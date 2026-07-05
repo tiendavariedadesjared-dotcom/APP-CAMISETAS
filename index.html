@@ -14926,7 +14926,7 @@ function _scanAgregarCarrito(item){
   var reservado=0;
   _carrito.forEach(function(it){if(it.invIdx===String(idx)||it.invIdx===idx)reservado+=it.qty;});
   if(1>item.stk-reservado){
-    return{ok:false,msg:'Sin stock disponible ('+item.eq+' T:'+item.tal+')'};
+    return{ok:false,msg:'Sin stock ('+item.eq+' T:'+item.tal+' '+item.ver+' '+item.col+' · stk:'+item.stk+' reserv:'+reservado+')'};
   }
   var existente=_carrito.findIndex(function(it){return it.invIdx===String(idx)||it.invIdx===idx;});
   if(existente>=0){
