@@ -14818,17 +14818,21 @@ function _scanAbrir(){
     alert('Tu navegador no permite usar la cámara. Probá con Chrome o Safari actualizado.');
     return;
   }
-  document.getElementById('scan-msg').textContent='';
+  document.getElementById('scan-msg').textContent='Buscando código...';
+  document.getElementById('scan-msg').style.color='#fff';
   document.getElementById('mod-scan').style.display='flex';
   var video=document.getElementById('scan-video');
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}})
     .then(function(stream){
       _scanStream=stream;
       video.srcObject=stream;
       video.setAttribute('playsinline',true);
       video.play();
       _scanActivo=true;
-      _scanLoop();
+      // Esperar a que el video tenga dimensiones antes de arrancar el loop
+      video.onloadedmetadata=function(){ _scanLoop(); };
+      // Fallback por si onloadedmetadata no dispara
+      setTimeout(function(){ if(_scanActivo) _scanLoop(); }, 500);
     })
     .catch(function(err){
       document.getElementById('mod-scan').style.display='none';
@@ -14836,28 +14840,39 @@ function _scanAbrir(){
     });
 }
 
+var _scanCanvas=null;
+var _scanCtx=null;
+var _scanLoopCorriendo=false;
 function _scanLoop(){
-  if(!_scanActivo)return;
+  if(!_scanActivo){_scanLoopCorriendo=false;return;}
+  if(_scanLoopCorriendo && arguments[0]!=='tick'){return;} // evitar doble arranque
+  _scanLoopCorriendo=true;
   var video=document.getElementById('scan-video');
-  if(video.readyState===video.HAVE_ENOUGH_DATA){
-    var canvas=document.createElement('canvas');
-    canvas.width=video.videoWidth;
-    canvas.height=video.videoHeight;
-    var ctx=canvas.getContext('2d');
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-    var imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-    var code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
+  if(video&&video.readyState===video.HAVE_ENOUGH_DATA&&video.videoWidth>0){
+    if(!_scanCanvas){
+      _scanCanvas=document.createElement('canvas');
+      _scanCtx=_scanCanvas.getContext('2d',{willReadFrequently:true});
+    }
+    _scanCanvas.width=video.videoWidth;
+    _scanCanvas.height=video.videoHeight;
+    _scanCtx.drawImage(video,0,0,_scanCanvas.width,_scanCanvas.height);
+    var imgData=_scanCtx.getImageData(0,0,_scanCanvas.width,_scanCanvas.height);
+    var code=null;
+    try{
+      code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'attemptBoth'});
+    }catch(e){}
     if(code&&code.data){
       _scanProcesar(code.data);
       return;
     }
   }
-  _scanRAF=requestAnimationFrame(_scanLoop);
+  _scanRAF=requestAnimationFrame(function(){_scanLoop('tick');});
 }
 
 function _scanProcesar(texto){
   // Pausar el loop mientras procesamos
   _scanActivo=false;
+  _scanLoopCorriendo=false;
   var datos=null;
   try{
     datos=JSON.parse(texto);
@@ -14919,8 +14934,10 @@ function _scanFeedback(msg, exito){
   // Reanudar escaneo después de 1.5s
   setTimeout(function(){
     if(document.getElementById('mod-scan').style.display!=='none'){
-      el.textContent='';
+      el.textContent='Buscando código...';
+      el.style.color='#fff';
       _scanActivo=true;
+      _scanLoopCorriendo=false;
       _scanLoop();
     }
   }, 1500);
@@ -14928,6 +14945,7 @@ function _scanFeedback(msg, exito){
 
 function _scanCerrar(){
   _scanActivo=false;
+  _scanLoopCorriendo=false;
   if(_scanRAF)cancelAnimationFrame(_scanRAF);
   if(_scanStream){
     _scanStream.getTracks().forEach(function(t){t.stop();});
