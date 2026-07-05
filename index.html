@@ -14843,12 +14843,15 @@ function _scanAbrir(){
 var _scanCanvas=null;
 var _scanCtx=null;
 var _scanLoopCorriendo=false;
+var _scanFrames=0;
 function _scanLoop(){
   if(!_scanActivo){_scanLoopCorriendo=false;return;}
   if(_scanLoopCorriendo && arguments[0]!=='tick'){return;} // evitar doble arranque
   _scanLoopCorriendo=true;
   var video=document.getElementById('scan-video');
+  var dbg=document.getElementById('scan-msg');
   if(video&&video.readyState===video.HAVE_ENOUGH_DATA&&video.videoWidth>0){
+    _scanFrames++;
     if(!_scanCanvas){
       _scanCanvas=document.createElement('canvas');
       _scanCtx=_scanCanvas.getContext('2d',{willReadFrequently:true});
@@ -14858,12 +14861,22 @@ function _scanLoop(){
     _scanCtx.drawImage(video,0,0,_scanCanvas.width,_scanCanvas.height);
     var imgData=_scanCtx.getImageData(0,0,_scanCanvas.width,_scanCanvas.height);
     var code=null;
+    var errMsg='';
     try{
       code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'attemptBoth'});
-    }catch(e){}
+    }catch(e){errMsg=e.message;}
+    if(dbg){
+      dbg.textContent='📷 '+video.videoWidth+'x'+video.videoHeight+' · frames:'+_scanFrames+(errMsg?' · ERR:'+errMsg:' · buscando...');
+    }
     if(code&&code.data){
       _scanProcesar(code.data);
       return;
+    }
+  } else {
+    if(dbg){
+      var rs=video?video.readyState:'sin video';
+      var vw=video?video.videoWidth:0;
+      dbg.textContent='⏳ Cargando cámara... (estado:'+rs+' ancho:'+vw+')';
     }
   }
   _scanRAF=requestAnimationFrame(function(){_scanLoop('tick');});
@@ -14934,10 +14947,9 @@ function _scanFeedback(msg, exito){
   // Reanudar escaneo después de 1.5s
   setTimeout(function(){
     if(document.getElementById('mod-scan').style.display!=='none'){
-      el.textContent='Buscando código...';
-      el.style.color='#fff';
       _scanActivo=true;
       _scanLoopCorriendo=false;
+      _scanFrames=0;
       _scanLoop();
     }
   }, 1500);
