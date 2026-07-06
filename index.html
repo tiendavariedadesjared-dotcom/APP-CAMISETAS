@@ -14672,9 +14672,15 @@ function _qrGenerar(){
   var item=variantes.find(function(v){return v.tal===talla;});
   if(!item){alert('No se encontró esa talla.');return;}
 
-  // Datos dentro del QR: solo el ID (prefijo VJ para identificar que es de esta app)
-  // Un QR más corto = menos denso = mucho más fácil de escanear
-  var qrData='VJ'+item.id;
+  // Datos dentro del QR: las VARIABLES del producto (no el id).
+  // Así el QR sirve aunque la tarjeta se recree o el stock sea nuevo.
+  // Formato compacto: VJ2|eq|dor|tal|ver|col|año|extra1=val1;extra2=val2
+  var extPairs='';
+  if(item.extras){
+    extPairs=Object.keys(item.extras).filter(function(k){return item.extras[k];})
+      .map(function(k){return k+'='+item.extras[k];}).join(';');
+  }
+  var qrData='VJ2|'+[item.eq,item.dor,item.tal,item.ver,item.col,item.año,extPairs].join('|');
 
   // Texto legible para la etiqueta
   var extLines='';
@@ -14885,28 +14891,52 @@ function _scanProcesar(texto){
 
   var item=null;
 
-  // Formato nuevo: "VJ" + id del producto
-  if(texto&&texto.indexOf('VJ')===0){
+  function coincide(c, d){
+    // Compara todas las variables + extras
+    if(c.eq!==d.eq||c.dor!==d.dor||c.tal!==d.tal||c.ver!==d.ver||c.col!==d.col)return false;
+    if(String(c.año)!==String(d.año))return false;
+    var ea=c.extras||{}, eb=d.extras||{};
+    var keys=Object.keys(ea).concat(Object.keys(eb));
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i];
+      if((ea[k]||'')!==(eb[k]||''))return false;
+    }
+    return true;
+  }
+
+  if(texto&&texto.indexOf('VJ2|')===0){
+    // Formato nuevo por variables: VJ2|eq|dor|tal|ver|col|año|extras
+    var partes=texto.substring(4).split('|');
+    var extras={};
+    if(partes[6]){
+      partes[6].split(';').forEach(function(par){
+        var kv=par.split('=');
+        if(kv.length===2)extras[kv[0]]=kv[1];
+      });
+    }
+    var d={eq:partes[0],dor:partes[1],tal:partes[2],ver:partes[3],col:partes[4],año:partes[5],extras:extras};
+    item=INV.find(function(c){return coincide(c,d);});
+  } else if(texto&&texto.indexOf('VJ')===0){
+    // Formato viejo por id: VJ + id
     var idBuscado=texto.substring(2);
-    // El id puede ser número o string; comparar de ambas formas
     item=INV.find(function(c){return String(c.id)===idBuscado;});
   } else {
-    // Formato viejo: JSON completo (compatibilidad con QR ya impresos)
+    // Formato más viejo: JSON completo
     var datos=null;
     try{ datos=JSON.parse(texto); }catch(e){}
-    if(datos&&datos.id){
-      item=INV.find(function(c){return String(c.id)===String(datos.id);});
+    if(datos&&(datos.id||datos.eq)){
+      if(datos.id)item=INV.find(function(c){return String(c.id)===String(datos.id);});
       if(!item){
         item=INV.find(function(c){
           return c.eq===datos.eq&&c.dor===datos.dor&&c.tal===datos.tal&&
-                 c.ver===datos.ver&&c.col===datos.col&&String(c.año)===String(datos.ano);
+                 c.ver===datos.ver&&c.col===datos.col&&String(c.año)===String(datos.ano||datos.año);
         });
       }
     }
   }
 
   if(!item){
-    _scanFeedback('❌ Producto no encontrado. ¿Es un QR de esta app?', false);
+    _scanFeedback('❌ Producto no encontrado en el inventario.', false);
     return;
   }
 
