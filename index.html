@@ -12837,6 +12837,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </select>
     </div>
     <button onclick="limpiarFiltrosInv()" id="btn-limpiar-filtros" style="display:none;width:100%;padding:7px;margin-bottom:4px;border:none;border-radius:var(--border-radius-md);background:#FCEBEB;color:#A32D2D;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">✕ Limpiar filtros</button>
+    <button onclick="_etiquetasFiltro()" style="width:100%;padding:8px;margin-bottom:6px;border:0.5px solid #7B3F00;border-radius:var(--border-radius-md);background:none;color:#7B3F00;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">🏷️ Generar etiquetas de lo filtrado</button>
     <div id="inv-totales" style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:9px 13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-size:0.72rem;color:var(--color-text-secondary);font-weight:500;" id="inv-tot-lbl">Total en vista</span>
       <span style="font-size:0.88rem;font-weight:700;color:var(--gr);" id="inv-tot-val">—</span>
@@ -14147,7 +14148,8 @@ function renderInv(){
     }).join('')+'</div>':'';
 
     var btnQR='<button onclick="_qrAbrir('+repIdx+')" style="font-size:0.68rem;color:#1a56a0;background:none;border:0.5px solid #1a56a0;border-radius:6px;padding:4px 10px;cursor:pointer;touch-action:manipulation;margin-top:2px;margin-left:6px;">📲 Generar QR</button>';
-    var gestorFotos='<div style="margin-top:6px;">'+thumbsNormal+btnFotos+btnQR+'</div>';
+    var btnEtq='<button onclick="_etiquetasModelo('+repIdx+')" style="font-size:0.68rem;color:#7B3F00;background:none;border:0.5px solid #7B3F00;border-radius:6px;padding:4px 10px;cursor:pointer;touch-action:manipulation;margin-top:2px;margin-left:6px;">🏷️ Etiquetas</button>';
+    var gestorFotos='<div style="margin-top:6px;">'+thumbsNormal+btnFotos+btnQR+btnEtq+'</div>';
 
     // Ordenar variantes por talla
     variantes.sort(function(a,b){
@@ -14681,6 +14683,7 @@ function _qrGenerar(){
       .map(function(k){return k+'='+item.extras[k];}).join(';');
   }
   var qrData='VJ2|'+[item.eq,item.dor,item.tal,item.ver,item.col,item.año,extPairs].join('|');
+  var qrDataEnc=encodeURIComponent(qrData);
 
   // Texto legible para la etiqueta
   var extLines='';
@@ -14695,7 +14698,7 @@ function _qrGenerar(){
   }
   try{
     var qr=qrcode(0,'H');
-    qr.addData(qrData);
+    qr.addData(qrDataEnc);
     qr.make();
     window._qrObj=qr;
     window._qrItem=item;
@@ -14802,6 +14805,130 @@ function _qrCerrar(){
   window._qrItem=null;
 }
 
+// ── ETIQUETAS EN SERIE (para impresora 3nStar LTT214, 1.5"x1") ──
+// Genera una página imprimible con una etiqueta por cada unidad en stock.
+function _generarEtiquetasQR(items, titulo){
+  if(typeof qrcode!=='function'){
+    alert('La librería de QR no cargó. Recargá la app.');
+    return;
+  }
+  // Filtrar solo con stock > 0
+  var conStock=items.filter(function(c){return c.stk>0;});
+  if(!conStock.length){
+    alert('No hay unidades en stock para generar etiquetas.');
+    return;
+  }
+  // Contar total de etiquetas
+  var totalEtiquetas=conStock.reduce(function(s,c){return s+c.stk;},0);
+  if(totalEtiquetas>500){
+    if(!confirm('Se generarán '+totalEtiquetas+' etiquetas. ¿Continuar?'))return;
+  }
+
+  // Construir el HTML de cada etiqueta
+  function svgQR(texto){
+    var qr=qrcode(0,'H');
+    qr.addData(texto);
+    qr.make();
+    var count=qr.getModuleCount();
+    var cell=4;
+    var size=count*cell;
+    var rects='';
+    for(var r=0;r<count;r++){
+      for(var c=0;c<count;c++){
+        if(qr.isDark(r,c)){
+          rects+='<rect x="'+(c*cell)+'" y="'+(r*cell)+'" width="'+cell+'" height="'+cell+'"/>';
+        }
+      }
+    }
+    return '<svg viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;shape-rendering:crispEdges;"><rect width="'+size+'" height="'+size+'" fill="#fff"/><g fill="#000">'+rects+'</g></svg>';
+  }
+
+  var etiquetasHtml='';
+  conStock.forEach(function(item){
+    // Datos del QR (mismo formato por variables)
+    var extPairs='';
+    if(item.extras){
+      extPairs=Object.keys(item.extras).filter(function(k){return item.extras[k];})
+        .map(function(k){return k+'='+item.extras[k];}).join(';');
+    }
+    var qrData='VJ2|'+[item.eq,item.dor,item.tal,item.ver,item.col,item.año,extPairs].join('|');
+    var qrSvg=svgQR(encodeURIComponent(qrData));
+    // Texto legible
+    var extTxt='';
+    if(item.extras)Object.keys(item.extras).forEach(function(k){if(item.extras[k])extTxt+=' · '+item.extras[k];});
+    var infoHtml='<div class="lb-eq">'+item.eq+'</div>'+
+      '<div class="lb-dor">'+item.dor+'</div>'+
+      '<div class="lb-tal">T: '+item.tal+'</div>'+
+      '<div class="lb-det">'+item.ver+'<br>'+item.col+' · '+item.año+'</div>'+
+      (extTxt?'<div class="lb-ext">'+extTxt.replace(/^ · /,'')+'</div>':'');
+    // Repetir según stock
+    for(var n=0;n<item.stk;n++){
+      etiquetasHtml+='<div class="etq"><div class="etq-qr">'+qrSvg+'</div><div class="etq-info">'+infoHtml+'</div></div>';
+    }
+  });
+
+  // Página imprimible: cada etiqueta 1.5in x 1in
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiquetas — '+titulo+'</title>'+
+    '<style>'+
+    '@page{size:1.5in 1in;margin:0;}'+
+    '*{margin:0;padding:0;box-sizing:border-box;}'+
+    'body{font-family:Arial,Helvetica,sans-serif;}'+
+    '.barra{padding:10px;background:#1D9E75;color:#fff;text-align:center;font-size:14px;}'+
+    '.barra button{margin-left:10px;padding:6px 16px;border:none;border-radius:6px;background:#fff;color:#111;font-weight:700;cursor:pointer;font-size:13px;}'+
+    '.etq{width:1.5in;height:1in;display:flex;align-items:center;padding:0.04in;page-break-after:always;break-after:page;overflow:hidden;}'+
+    '.etq-qr{width:0.92in;height:0.92in;flex-shrink:0;}'+
+    '.etq-info{flex:1;padding-left:0.05in;overflow:hidden;line-height:1.05;}'+
+    '.lb-eq{font-size:8.5pt;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+    '.lb-dor{font-size:7pt;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+    '.lb-tal{font-size:11pt;font-weight:800;margin:1px 0;}'+
+    '.lb-det{font-size:6pt;color:#222;}'+
+    '.lb-ext{font-size:5.5pt;color:#555;}'+
+    '@media screen{body{background:#ddd;}.etq{background:#fff;margin:6px auto;box-shadow:0 1px 4px rgba(0,0,0,.2);}}'+
+    '@media print{.barra{display:none;}.etq{box-shadow:none;margin:0;}}'+
+    '</style></head><body>'+
+    '<div class="barra">'+totalEtiquetas+' etiqueta(s) — '+titulo+' <button onclick="window.print()">🖨️ Imprimir</button></div>'+
+    etiquetasHtml+
+    '</body></html>';
+
+  var win=window.open('','_blank');
+  if(!win){alert('El navegador bloqueó la ventana. Permití las ventanas emergentes e intentá de nuevo.');return;}
+  win.document.write(html);
+  win.document.close();
+}
+
+// Etiquetas de un modelo (todas sus tallas × cantidades)
+function _etiquetasModelo(repIdx){
+  var rep=INV[repIdx];
+  if(!rep){alert('No se encontró la tarjeta.');return;}
+  var clave=claveModelo(rep);
+  var variantes=INV.filter(function(c){return claveModelo(c)===clave;});
+  _generarEtiquetasQR(variantes, rep.eq+' '+rep.dor);
+}
+
+// Etiquetas según el filtro actual del inventario
+function _etiquetasFiltro(){
+  var fE=(document.getElementById('f-eq')||{}).value||'';
+  var fT=(document.getElementById('f-ta')||{}).value||'';
+  var fCat=(document.getElementById('f-cat')||{}).value||'';
+  var fCol=(document.getElementById('f-col')||{}).value||'';
+  var fVer=(document.getElementById('f-ver')||{}).value||'';
+  var fDor=(document.getElementById('f-dor')||{}).value||'';
+  var fAño=(document.getElementById('f-año')||{}).value||'';
+  var lista=INV.filter(function(c){
+    if(fE&&c.eq!==fE)return false;
+    if(fT&&c.tal!==fT)return false;
+    if(fCat&&getCat(c)!==fCat)return false;
+    if(fCol&&c.col!==fCol)return false;
+    if(fVer&&c.ver!==fVer)return false;
+    if(fDor&&c.dor!==fDor)return false;
+    if(fAño&&String(c.año)!==fAño)return false;
+    return true;
+  });
+  if(!lista.length){alert('El filtro actual no tiene productos.');return;}
+  var desc=[fE,fT,fCat,fCol,fVer,fDor,fAño].filter(Boolean).join(' ');
+  _generarEtiquetasQR(lista, desc||'Filtro actual');
+}
+
 // ── ESCANEAR QR ──────────────────────────────────────────
 var _scanStream=null;
 var _scanRAF=null;
@@ -14888,6 +15015,11 @@ function _scanProcesar(texto){
   // Pausar el loop mientras procesamos
   _scanActivo=false;
   _scanLoopCorriendo=false;
+
+  // Si viene codificado con encodeURIComponent (contiene %), decodificar
+  if(texto&&texto.indexOf('%')>=0){
+    try{ texto=decodeURIComponent(texto); }catch(e){}
+  }
 
   var item=null;
 
