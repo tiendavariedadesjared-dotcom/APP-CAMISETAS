@@ -14890,10 +14890,26 @@ function _generarEtiquetasQR(items, titulo){
     etiquetasHtml+
     '</body></html>';
 
-  var win=window.open('','_blank');
-  if(!win){alert('El navegador bloqueó la ventana. Permití las ventanas emergentes e intentá de nuevo.');return;}
-  win.document.write(html);
-  win.document.close();
+  // Descargar como archivo HTML para compartir a la PC con la impresora
+  try{
+    var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var nombreArch='Etiquetas_'+titulo.replace(/[^a-zA-Z0-9]/g,'_')+'_'+totalEtiquetas+'uds.html';
+    var a=document.createElement('a');
+    a.href=url;
+    a.download=nombreArch;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},2000);
+    alert('✓ Archivo de etiquetas descargado:\n'+nombreArch+'\n\nCompartilo a la PC con la impresora, abrilo en el navegador y dale Imprimir.');
+  }catch(e){
+    // Fallback: si la descarga falla, abrir en ventana (método anterior)
+    var win=window.open('','_blank');
+    if(!win){alert('No se pudo descargar ni abrir la ventana. Permití descargas y ventanas emergentes.');return;}
+    win.document.write(html);
+    win.document.close();
+  }
 }
 
 // Etiquetas de un modelo (todas sus tallas × cantidades)
