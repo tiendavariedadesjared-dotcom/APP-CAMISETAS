@@ -12837,7 +12837,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </select>
     </div>
     <button onclick="limpiarFiltrosInv()" id="btn-limpiar-filtros" style="display:none;width:100%;padding:7px;margin-bottom:4px;border:none;border-radius:var(--border-radius-md);background:#FCEBEB;color:#A32D2D;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">✕ Limpiar filtros</button>
-    <button onclick="_etiquetasFiltro()" style="width:100%;padding:8px;margin-bottom:6px;border:0.5px solid #7B3F00;border-radius:var(--border-radius-md);background:none;color:#7B3F00;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">🏷️ Generar etiquetas de lo filtrado</button>
+    <button onclick="_csvFiltro()" style="width:100%;padding:8px;margin-bottom:6px;border:0.5px solid #7B3F00;border-radius:var(--border-radius-md);background:none;color:#7B3F00;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">🏷️ Etiquetas de lo filtrado (CSV)</button>
     <div id="inv-totales" style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:9px 13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-size:0.72rem;color:var(--color-text-secondary);font-weight:500;" id="inv-tot-lbl">Total en vista</span>
       <span style="font-size:0.88rem;font-weight:700;color:var(--gr);" id="inv-tot-val">—</span>
@@ -13348,28 +13348,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;border:3px solid #1D9E75;border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);z-index:1;pointer-events:none;"></div>
   <div id="scan-msg" style="position:absolute;bottom:90px;left:16px;right:16px;text-align:center;color:#fff;font-size:0.85rem;font-weight:600;z-index:2;text-shadow:0 1px 3px rgba(0,0,0,0.8);"></div>
   <button onclick="_scanCerrar()" style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 32px;border:none;border-radius:30px;background:#fff;color:#111;font-size:0.9rem;font-weight:700;cursor:pointer;touch-action:manipulation;z-index:2;">Cerrar</button>
-</div>
-
-<!-- MODAL QR -->
-<div id="mod-qr" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;border-radius:16px;padding:20px 16px;width:100%;max-width:360px;text-align:center;max-height:90vh;overflow-y:auto;">
-    <div style="font-size:0.95rem;font-weight:700;color:#111;margin-bottom:4px;" id="qr-titulo"></div>
-    <div style="font-size:0.75rem;color:#666;margin-bottom:14px;" id="qr-subtitulo"></div>
-    <div id="qr-paso-talla">
-      <label style="font-size:0.75rem;font-weight:600;color:#555;display:block;margin-bottom:6px;text-align:left;">Seleccioná la talla:</label>
-      <select id="qr-talla-sel" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;background:#f9f9f9;box-sizing:border-box;">
-        <option value="">-- Talla --</option>
-      </select>
-      <button onclick="_qrGenerar()" style="margin-top:12px;width:100%;padding:11px;border:none;border-radius:8px;background:#1D9E75;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;touch-action:manipulation;">Generar QR</button>
-    </div>
-    <div id="qr-paso-resultado" style="display:none;">
-      <div id="qr-canvas-wrap" style="display:flex;justify-content:center;margin-bottom:12px;"></div>
-      <div id="qr-info-label" style="font-size:0.78rem;color:#222;background:#f5f5f5;border-radius:8px;padding:10px;margin-bottom:14px;line-height:1.7;text-align:center;font-weight:600;"></div>
-      <button onclick="_qrDescargar()" style="width:100%;padding:11px;border:none;border-radius:8px;background:#1a56a0;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:8px;touch-action:manipulation;">⬇️ Descargar etiqueta</button>
-      <button onclick="_qrVolver()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;color:#555;font-size:0.82rem;cursor:pointer;margin-bottom:8px;touch-action:manipulation;">← Otra talla</button>
-    </div>
-    <button onclick="_qrCerrar()" style="width:100%;padding:9px;border:none;background:none;color:#aaa;font-size:0.82rem;cursor:pointer;margin-top:4px;touch-action:manipulation;">Cerrar</button>
-  </div>
 </div>
 
 <div id="toast-sync">☁️ Sincronizado</div>
@@ -14147,9 +14125,8 @@ function renderInv(){
       '</div>';
     }).join('')+'</div>':'';
 
-    var btnQR='<button onclick="_qrAbrir('+repIdx+')" style="font-size:0.68rem;color:#1a56a0;background:none;border:0.5px solid #1a56a0;border-radius:6px;padding:4px 10px;cursor:pointer;touch-action:manipulation;margin-top:2px;margin-left:6px;">📲 Generar QR</button>';
-    var btnEtq='<button onclick="_etiquetasModelo('+repIdx+')" style="font-size:0.68rem;color:#7B3F00;background:none;border:0.5px solid #7B3F00;border-radius:6px;padding:4px 10px;cursor:pointer;touch-action:manipulation;margin-top:2px;margin-left:6px;">🏷️ Etiquetas</button>';
-    var gestorFotos='<div style="margin-top:6px;">'+thumbsNormal+btnFotos+btnQR+btnEtq+'</div>';
+    var btnEtq='<button onclick="_csvModelo('+repIdx+')" style="font-size:0.68rem;color:#7B3F00;background:none;border:0.5px solid #7B3F00;border-radius:6px;padding:4px 10px;cursor:pointer;touch-action:manipulation;margin-top:2px;margin-left:6px;">🏷️ Etiquetas (CSV)</button>';
+    var gestorFotos='<div style="margin-top:6px;">'+thumbsNormal+btnFotos+btnEtq+'</div>';
 
     // Ordenar variantes por talla
     variantes.sort(function(a,b){
@@ -14217,7 +14194,7 @@ function renderInv(){
     html+='<div class="inv-item'+(borde?' '+borde:'')+'" data-modelo-key="'+k.replace(/"/g,'&quot;')+'">'+
       fotoHtml+
       '<div class="inv-top">'+
-        '<div><div class="inv-name">'+rep.eq+'</div><div class="inv-sub">'+rep.dor+'</div></div>'+
+        '<div><div class="inv-name">'+rep.eq+(rep.soloTienda?' <span style="font-size:0.6rem;font-weight:700;color:#7B3F00;background:#FAEEDA;border-radius:5px;padding:1px 6px;vertical-align:middle;">🏪 SOLO TIENDA</span>':'')+'</div><div class="inv-sub">'+rep.dor+'</div></div>'+
         '<span class="tag">'+sw(rep.col)+rep.col+'</span>'+
       '</div>'+
       '<div class="tags"><span class="tag">'+rep.año+'</span>'+extTags+'</div>'+
@@ -14633,296 +14610,68 @@ function del(i){
   renderInv();actualizarFechas();
 }
 
-// ── GENERADOR QR ─────────────────────────────────────────
-var _qrClave=null;
-
-function _qrAbrir(repIdx){
-  // repIdx es el índice en INV del ítem representativo (igual que abrirFotoEdit)
-  var rep=INV[repIdx];
-  if(!rep){alert('No se encontró la tarjeta.');return;}
-  _qrClave=claveModelo(rep);
-  // Obtener todas las variantes (tallas) de este modelo
-  var variantes=INV.filter(function(c){return claveModelo(c)===_qrClave;});
-  if(!variantes.length){alert('No se encontraron tallas.');return;}
-
-  document.getElementById('qr-titulo').textContent=rep.eq+' | '+rep.dor;
-  var ext='';
-  if(rep.extras)Object.keys(rep.extras).forEach(function(k){if(rep.extras[k])ext+=' · '+rep.extras[k];});
-  document.getElementById('qr-subtitulo').textContent=rep.ver+' · '+rep.col+' · '+rep.año+ext;
-
-  // Ordenar variantes por talla
-  variantes.sort(function(a,b){
-    var ia=TALLA_ORDEN.indexOf((a.tal||'').toUpperCase()),ib=TALLA_ORDEN.indexOf((b.tal||'').toUpperCase());
-    if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return-1;if(ib>=0)return 1;
-    return (a.tal||'').localeCompare(b.tal||'','es');
-  });
-  var sel=document.getElementById('qr-talla-sel');
-  sel.innerHTML='<option value="">-- Talla --</option>'+variantes.map(function(v){
-    return '<option value="'+String(v.tal).replace(/"/g,'&quot;')+'">'+v.tal+' (stock: '+v.stk+')</option>';
-  }).join('');
-
-  document.getElementById('qr-paso-talla').style.display='block';
-  document.getElementById('qr-paso-resultado').style.display='none';
-  document.getElementById('qr-canvas-wrap').innerHTML='';
-  document.getElementById('mod-qr').style.display='flex';
-}
-
-function _qrGenerar(){
-  var talla=document.getElementById('qr-talla-sel').value;
-  if(!talla){alert('Seleccioná una talla.');return;}
-  var variantes=INV.filter(function(c){return claveModelo(c)===_qrClave;});
-  var item=variantes.find(function(v){return v.tal===talla;});
-  if(!item){alert('No se encontró esa talla.');return;}
-
-  // Datos dentro del QR: las VARIABLES del producto (no el id).
-  // Así el QR sirve aunque la tarjeta se recree o el stock sea nuevo.
-  // Formato compacto: VJ2|eq|dor|tal|ver|col|año|extra1=val1;extra2=val2
-  var extPairs='';
-  if(item.extras){
-    extPairs=Object.keys(item.extras).filter(function(k){return item.extras[k];})
-      .map(function(k){return k+'='+item.extras[k];}).join(';');
-  }
-  var qrData='VJ2|'+[item.eq,item.dor,item.tal,item.ver,item.col,item.año,extPairs].join('|');
-  var qrDataEnc=encodeURIComponent(qrData);
-
-  // Texto legible para la etiqueta
-  var extLines='';
-  if(item.extras)Object.keys(item.extras).forEach(function(k){if(item.extras[k])extLines+='<br>'+item.extras[k];});
-  var labelHtml=item.eq+' | '+item.dor+'<br>T:'+item.tal+' · '+item.ver+'<br>'+item.col+' · '+item.año+extLines;
-  document.getElementById('qr-info-label').innerHTML=labelHtml;
-
-  // Generar el QR usando qrcode-generator
-  if(typeof qrcode!=='function'){
-    alert('La librería de QR no cargó. Verificá tu conexión a internet y recargá.');
-    return;
-  }
-  try{
-    var qr=qrcode(0,'H');
-    qr.addData(qrDataEnc);
-    qr.make();
-    window._qrObj=qr;
-    window._qrItem=item;
-    // Dibujar en pantalla usando canvas + isDark (API más estable)
-    var count=qr.getModuleCount();
-    var cell=5, margin=cell*2;
-    var px=count*cell, W=px+margin*2;
-    var cv=document.createElement('canvas');
-    cv.width=W; cv.height=W;
-    cv.style.width='200px'; cv.style.height='200px';
-    cv.style.imageRendering='pixelated';
-    var cx=cv.getContext('2d');
-    cx.fillStyle='#fff'; cx.fillRect(0,0,W,W);
-    cx.fillStyle='#000';
-    for(var r=0;r<count;r++){for(var c=0;c<count;c++){
-      if(qr.isDark(r,c)) cx.fillRect(margin+c*cell, margin+r*cell, cell, cell);
-    }}
-    var wrap=document.getElementById('qr-canvas-wrap');
-    wrap.innerHTML='';
-    wrap.appendChild(cv);
-  }catch(e){
-    alert('Error al generar el QR: '+e.message);
-    return;
-  }
-
-  document.getElementById('qr-paso-talla').style.display='none';
-  document.getElementById('qr-paso-resultado').style.display='block';
-}
-
-function _qrDescargar(){
-  var qr=window._qrObj;
-  var item=window._qrItem;
-  if(!qr||!item){alert('Generá el QR primero.');return;}
-
-  var count=qr.getModuleCount();
-  var cell=8;          // px por módulo en la imagen final (alta resolución)
-  var margin=cell*2;
-  var qrPx=count*cell;
-  var W=qrPx+margin*2;
-
-  // Texto legible
-  var lines=[item.eq+' | '+item.dor, 'T:'+item.tal+' · '+item.ver, item.col+' · '+item.año];
-  if(item.extras)Object.keys(item.extras).forEach(function(k){if(item.extras[k])lines.push(item.extras[k]);});
-
-  var lineH=22;
-  var textTop=qrPx+margin*2;
-  var textH=lines.length*lineH+margin;
-  var H=textTop+textH;
-
-  var canvas=document.createElement('canvas');
-  canvas.width=W;
-  canvas.height=H;
-  var ctx=canvas.getContext('2d');
-
-  // Fondo blanco
-  ctx.fillStyle='#ffffff';
-  ctx.fillRect(0,0,W,H);
-
-  // Dibujar módulos del QR
-  ctx.fillStyle='#000000';
-  for(var r=0;r<count;r++){
-    for(var c=0;c<count;c++){
-      if(qr.isDark(r,c)){
-        ctx.fillRect(margin+c*cell, margin+r*cell, cell, cell);
-      }
-    }
-  }
-
-  // Línea separadora
-  ctx.strokeStyle='#cccccc';
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  ctx.moveTo(margin, qrPx+margin*1.5);
-  ctx.lineTo(W-margin, qrPx+margin*1.5);
-  ctx.stroke();
-
-  // Texto
-  ctx.textAlign='center';
-  ctx.fillStyle='#111111';
-  lines.forEach(function(line,i){
-    ctx.font=(i===0?'bold 16px Arial':'14px Arial');
-    ctx.fillText(line, W/2, textTop+i*lineH+lineH*0.7);
-  });
-
-  // Nombre de archivo
-  var nombre='QR_'+[item.eq,item.dor,item.tal,item.ver,item.col,item.año].join('_').replace(/[^a-zA-Z0-9_]/g,'')+'.png';
-  var link=document.createElement('a');
-  link.download=nombre;
-  link.href=canvas.toDataURL('image/png');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-function _qrVolver(){
-  document.getElementById('qr-paso-talla').style.display='block';
-  document.getElementById('qr-paso-resultado').style.display='none';
-}
-
-function _qrCerrar(){
-  document.getElementById('mod-qr').style.display='none';
-  _qrClave=null;
-  window._qrObj=null;
-  window._qrItem=null;
-}
-
-// ── ETIQUETAS EN SERIE (para impresora 3nStar LTT214, 1.5"x1") ──
-// Genera una página imprimible con una etiqueta por cada unidad en stock.
-function _generarEtiquetasQR(items, titulo){
-  if(typeof qrcode!=='function'){
-    alert('La librería de QR no cargó. Recargá la app.');
-    return;
-  }
-  // Filtrar solo con stock > 0
+// ── ETIQUETAS PARA BARTENDER (CSV) ───────────────────────
+// Genera un CSV con los datos de cada producto para importar en BarTender.
+// Columnas: qr,equipo,dorsal,talla,version,color,anio,extras,cantidad
+// BarTender genera el QR nativo desde la columna "qr" y usa "cantidad" como copias.
+function _generarCSVEtiquetas(items, titulo){
   var conStock=items.filter(function(c){return c.stk>0;});
-  if(!conStock.length){
-    alert('No hay unidades en stock para generar etiquetas.');
-    return;
-  }
-  // Contar total de etiquetas
-  var totalEtiquetas=conStock.reduce(function(s,c){return s+c.stk;},0);
-  if(totalEtiquetas>500){
-    if(!confirm('Se generarán '+totalEtiquetas+' etiquetas. ¿Continuar?'))return;
-  }
+  if(!conStock.length){alert('No hay unidades en stock para generar etiquetas.');return;}
 
-  // Construir el HTML de cada etiqueta
-  function svgQR(texto){
-    var qr=qrcode(0,'H');
-    qr.addData(texto);
-    qr.make();
-    var count=qr.getModuleCount();
-    var cell=4;
-    var size=count*cell;
-    var rects='';
-    for(var r=0;r<count;r++){
-      for(var c=0;c<count;c++){
-        if(qr.isDark(r,c)){
-          rects+='<rect x="'+(c*cell)+'" y="'+(r*cell)+'" width="'+cell+'" height="'+cell+'"/>';
-        }
-      }
+  function esc(v){
+    v=(v===undefined||v===null)?'':String(v);
+    // Escapar comillas y envolver en comillas si tiene coma, comilla o salto
+    if(v.indexOf('"')>=0||v.indexOf(',')>=0||v.indexOf('\n')>=0){
+      return '"'+v.replace(/"/g,'""')+'"';
     }
-    return '<svg viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;shape-rendering:crispEdges;"><rect width="'+size+'" height="'+size+'" fill="#fff"/><g fill="#000">'+rects+'</g></svg>';
+    return v;
   }
 
-  var etiquetasHtml='';
+  var filas=['qr,equipo,dorsal,talla,version,color,anio,extras,cantidad'];
   conStock.forEach(function(item){
-    // Datos del QR (mismo formato por variables)
     var extPairs='';
     if(item.extras){
       extPairs=Object.keys(item.extras).filter(function(k){return item.extras[k];})
         .map(function(k){return k+'='+item.extras[k];}).join(';');
     }
     var qrData='VJ2|'+[item.eq,item.dor,item.tal,item.ver,item.col,item.año,extPairs].join('|');
-    var qrSvg=svgQR(encodeURIComponent(qrData));
-    // Texto legible
+    // Texto de extras legible (separado por ·)
     var extTxt='';
-    if(item.extras)Object.keys(item.extras).forEach(function(k){if(item.extras[k])extTxt+=' · '+item.extras[k];});
-    var infoHtml='<div class="lb-eq">'+item.eq+'</div>'+
-      '<div class="lb-dor">'+item.dor+'</div>'+
-      '<div class="lb-tal">T: '+item.tal+'</div>'+
-      '<div class="lb-det">'+item.ver+'<br>'+item.col+' · '+item.año+'</div>'+
-      (extTxt?'<div class="lb-ext">'+extTxt.replace(/^ · /,'')+'</div>':'');
-    // Repetir según stock
-    for(var n=0;n<item.stk;n++){
-      etiquetasHtml+='<div class="etq"><div class="etq-qr">'+qrSvg+'</div><div class="etq-info">'+infoHtml+'</div></div>';
-    }
+    if(item.extras)Object.keys(item.extras).forEach(function(k){if(item.extras[k])extTxt+=(extTxt?' · ':'')+item.extras[k];});
+    filas.push([
+      esc(qrData),esc(item.eq),esc(item.dor),esc(item.tal),esc(item.ver),
+      esc(item.col),esc(item.año),esc(extTxt),esc(item.stk)
+    ].join(','));
   });
 
-  // Página imprimible: cada etiqueta 1.5in x 1in
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiquetas — '+titulo+'</title>'+
-    '<style>'+
-    '@page{size:1.5in 1in;margin:0;}'+
-    '*{margin:0;padding:0;box-sizing:border-box;}'+
-    'body{font-family:Arial,Helvetica,sans-serif;}'+
-    '.barra{padding:10px;background:#1D9E75;color:#fff;text-align:center;font-size:14px;}'+
-    '.barra button{margin-left:10px;padding:6px 16px;border:none;border-radius:6px;background:#fff;color:#111;font-weight:700;cursor:pointer;font-size:13px;}'+
-    '.etq{width:1.5in;height:1in;display:flex;align-items:center;padding:0.04in;page-break-after:always;break-after:page;overflow:hidden;}'+
-    '.etq-qr{width:0.92in;height:0.92in;flex-shrink:0;}'+
-    '.etq-info{flex:1;padding-left:0.05in;overflow:hidden;line-height:1.05;}'+
-    '.lb-eq{font-size:8.5pt;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
-    '.lb-dor{font-size:7pt;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
-    '.lb-tal{font-size:11pt;font-weight:800;margin:1px 0;}'+
-    '.lb-det{font-size:6pt;color:#222;}'+
-    '.lb-ext{font-size:5.5pt;color:#555;}'+
-    '@media screen{body{background:#ddd;}.etq{background:#fff;margin:6px auto;box-shadow:0 1px 4px rgba(0,0,0,.2);}}'+
-    '@media print{.barra{display:none;}.etq{box-shadow:none;margin:0;}}'+
-    '</style></head><body>'+
-    '<div class="barra">'+totalEtiquetas+' etiqueta(s) — '+titulo+' <button onclick="window.print()">🖨️ Imprimir</button></div>'+
-    etiquetasHtml+
-    '</body></html>';
+  var totalEtiquetas=conStock.reduce(function(s,c){return s+c.stk;},0);
+  var csv='\ufeff'+filas.join('\r\n'); // BOM para que Excel/BarTender lean bien las tildes
 
-  // Descargar como archivo HTML para compartir a la PC con la impresora
   try{
-    var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
     var url=URL.createObjectURL(blob);
-    var nombreArch='Etiquetas_'+titulo.replace(/[^a-zA-Z0-9]/g,'_')+'_'+totalEtiquetas+'uds.html';
+    var nombre='Etiquetas_'+titulo.replace(/[^a-zA-Z0-9]/g,'_')+'_'+conStock.length+'modelos.csv';
     var a=document.createElement('a');
-    a.href=url;
-    a.download=nombreArch;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.href=url;a.download=nombre;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
     setTimeout(function(){URL.revokeObjectURL(url);},2000);
-    alert('✓ Archivo de etiquetas descargado:\n'+nombreArch+'\n\nCompartilo a la PC con la impresora, abrilo en el navegador y dale Imprimir.');
+    alert('✓ CSV descargado: '+nombre+'\n\n'+conStock.length+' modelo(s) · '+totalEtiquetas+' etiqueta(s) en total.\n\nAbrilo en BarTender con tu plantilla de etiquetas.');
   }catch(e){
-    // Fallback: si la descarga falla, abrir en ventana (método anterior)
-    var win=window.open('','_blank');
-    if(!win){alert('No se pudo descargar ni abrir la ventana. Permití descargas y ventanas emergentes.');return;}
-    win.document.write(html);
-    win.document.close();
+    alert('No se pudo generar el CSV: '+e.message);
   }
 }
 
-// Etiquetas de un modelo (todas sus tallas × cantidades)
-function _etiquetasModelo(repIdx){
+// CSV de un modelo (todas sus tallas con stock)
+function _csvModelo(repIdx){
   var rep=INV[repIdx];
   if(!rep){alert('No se encontró la tarjeta.');return;}
   var clave=claveModelo(rep);
   var variantes=INV.filter(function(c){return claveModelo(c)===clave;});
-  _generarEtiquetasQR(variantes, rep.eq+' '+rep.dor);
+  _generarCSVEtiquetas(variantes, rep.eq+' '+rep.dor);
 }
 
-// Etiquetas según el filtro actual del inventario
-function _etiquetasFiltro(){
+// CSV según el filtro actual del inventario
+function _csvFiltro(){
   var fE=(document.getElementById('f-eq')||{}).value||'';
   var fT=(document.getElementById('f-ta')||{}).value||'';
   var fCat=(document.getElementById('f-cat')||{}).value||'';
@@ -14942,7 +14691,7 @@ function _etiquetasFiltro(){
   });
   if(!lista.length){alert('El filtro actual no tiene productos.');return;}
   var desc=[fE,fT,fCat,fCol,fVer,fDor,fAño].filter(Boolean).join(' ');
-  _generarEtiquetasQR(lista, desc||'Filtro actual');
+  _generarCSVEtiquetas(lista, desc||'Filtro');
 }
 
 // ── ESCANEAR QR ──────────────────────────────────────────
@@ -15479,6 +15228,10 @@ function abrirEditModal(claveK){
     '<div class="fg"><label>Versión</label><select id="em-ver">'+opVer+'</select></div></div>'+
     '<div class="fg"><label>Año</label><select id="em-año">'+opAño+'</select></div>'+
     (extrasHtml?'<div class="form-row">'+extrasHtml+'</div>':'')+
+    '<label style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:0.82rem;color:var(--color-text-primary);">'+
+      '<input type="checkbox" id="em-solotienda"'+(rep.soloTienda?' checked':'')+' style="width:18px;height:18px;cursor:pointer;">'+
+      '<span>🏪 Solo tienda <span style="color:var(--color-text-secondary);font-size:0.72rem;">(no aparece en el catálogo de clientes)</span></span>'+
+    '</label>'+
     '<div id="em-msg" class="msg" style="margin-top:8px;"></div>'+
     '<button class="btn btn-gr" style="margin-top:10px;" onclick="guardarEditModal(\''+claveK.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')" >'+
       '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'+
@@ -15506,16 +15259,19 @@ function guardarEditModal(claveK){
     var el=document.getElementById('em-ext-'+ei);
     if(el&&el.value)nuevosExtras[ex.nombre]=el.value;
   });
+  var nuevoSoloTienda=document.getElementById('em-solotienda')?document.getElementById('em-solotienda').checked:false;
 
   // Guardar valores ORIGINALES antes de modificar nada
   var rep0=variantes[0];
   var antesEq=rep0.eq, antesDor=rep0.dor, antesCol=rep0.col, antesVer=rep0.ver, antesAño=String(rep0.año);
   var antesExtras=JSON.parse(JSON.stringify(rep0.extras||{}));
+  var antesSoloTienda=!!rep0.soloTienda;
 
   // Actualizar campos comunes en todas las variantes (stock intacto)
   variantes.forEach(function(v){
     v.eq=nuevoEq;v.col=nuevoCol;v.dor=nuevoDor;v.ver=nuevoVer;v.año=nuevoAño;
     v.extras=JSON.parse(JSON.stringify(nuevosExtras));
+    v.soloTienda=nuevoSoloTienda;
   });
 
   // Detectar cambios campo por campo usando valores originales
@@ -15531,6 +15287,7 @@ function guardarEditModal(claveK){
     var despues=nuevosExtras[k]||'(vacío)';
     if(antes!==despues) cambios.push(k+': "'+antes+'" → "'+despues+'"');
   });
+  if(antesSoloTienda!==nuevoSoloTienda) cambios.push('Solo tienda: '+(antesSoloTienda?'Sí':'No')+' → '+(nuevoSoloTienda?'Sí':'No'));
   var detalle=cambios.length?cambios.join(' | '):'Sin cambios detectados';
   logBit('edicion',nuevoEq+' | '+nuevoDor,detalle);
   save();
