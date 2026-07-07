@@ -68,6 +68,8 @@ onSnapshot(_docRef, function(snap) {
     if (d.dem !== undefined)   { window.DEM   = JSON.parse(d.dem);   localStorage.setItem(window.DK, d.dem); }
     if (d.extras !== undefined){ window.EXTRAS = JSON.parse(d.extras);localStorage.setItem(window.EK, d.extras); }
     if (d.listas !== undefined){ window.L     = JSON.parse(d.listas);localStorage.setItem(window.LK, d.listas); }
+    if (d.bit !== undefined)   { window.BITACORA = JSON.parse(d.bit); if(typeof BITACORA!=='undefined')BITACORA=window.BITACORA; try{localStorage.setItem(BK, d.bit);}catch(e){} }
+    if (d.cons !== undefined)  { window.CONSIGNACIONES = JSON.parse(d.cons); try{localStorage.setItem('cj_cons', d.cons);}catch(e){} }
     // Re-renderizar si la app ya está lista
     if (typeof renderInv === 'function') {
       // Guardar estado del edit-modal y modo ajuste antes de re-renderizar
@@ -96,8 +98,15 @@ window._fbGuardar = function() {
     dem:    JSON.stringify(window.DEM),
     extras: JSON.stringify(window.EXTRAS),
     listas: JSON.stringify(window.L),
+    bit:    JSON.stringify(window.BITACORA || []),
+    cons:   JSON.stringify(window.CONSIGNACIONES || []),
     ts:     Date.now()
   }).catch(function(e){ console.error('Error Firebase save:', e); });
+};
+
+// _fbGuardarBit: alias de _fbGuardar (bitácora y consignaciones suben junto con todo)
+window._fbGuardarBit = function() {
+  if (typeof window._fbGuardar === 'function') window._fbGuardar();
 };
 
 // Toast de sincronización
