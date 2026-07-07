@@ -12837,7 +12837,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </select>
     </div>
     <button onclick="limpiarFiltrosInv()" id="btn-limpiar-filtros" style="display:none;width:100%;padding:7px;margin-bottom:4px;border:none;border-radius:var(--border-radius-md);background:#FCEBEB;color:#A32D2D;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">✕ Limpiar filtros</button>
-    <button onclick="_csvFiltro()" style="width:100%;padding:8px;margin-bottom:6px;border:0.5px solid #7B3F00;border-radius:var(--border-radius-md);background:none;color:#7B3F00;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">🏷️ Etiquetas de lo filtrado (CSV)</button>
+    <button onclick="_csvFiltro()" style="display:block;margin:0 0 6px auto;padding:3px 8px;border:none;border-radius:5px;background:none;color:var(--color-text-secondary);font-size:0.62rem;font-weight:500;cursor:pointer;touch-action:manipulation;opacity:0.7;">🏷️ CSV etiquetas</button>
     <div id="inv-totales" style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:9px 13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-size:0.72rem;color:var(--color-text-secondary);font-weight:500;" id="inv-tot-lbl">Total en vista</span>
       <span style="font-size:0.88rem;font-weight:700;color:var(--gr);" id="inv-tot-val">—</span>
@@ -14125,7 +14125,7 @@ function renderInv(){
       '</div>';
     }).join('')+'</div>':'';
 
-    var btnEtq='<button onclick="_csvModelo('+repIdx+')" style="font-size:0.68rem;color:#7B3F00;background:none;border:0.5px solid #7B3F00;border-radius:6px;padding:4px 10px;cursor:pointer;touch-action:manipulation;margin-top:2px;margin-left:6px;">🏷️ Etiquetas (CSV)</button>';
+    var btnEtq='<button onclick="_csvModelo('+repIdx+')" style="font-size:0.62rem;color:var(--color-text-secondary);background:none;border:none;padding:4px 6px;cursor:pointer;touch-action:manipulation;margin-top:2px;margin-left:4px;opacity:0.7;">🏷️ CSV</button>';
     var gestorFotos='<div style="margin-top:6px;">'+thumbsNormal+btnFotos+btnEtq+'</div>';
 
     // Ordenar variantes por talla
