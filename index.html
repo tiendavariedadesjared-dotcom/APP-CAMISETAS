@@ -13927,6 +13927,7 @@ function agregarMulti(){
   var extras={};
   EXTRAS.forEach(function(ex,ei){var el=document.getElementById('a-ext-'+ei);if(el&&el.value)extras[ex.nombre]=el.value;});
   var ingresados=0,sumados=0;
+  var _extIng='';if(extras)Object.keys(extras).forEach(function(k){if(extras[k])_extIng+=' · '+extras[k];});
   L.tallas.forEach(function(t,i){
     var el=document.getElementById('tq-'+i);
     var qty=parseInt(el?el.value:0)||0;
@@ -13937,13 +13938,16 @@ function agregarMulti(){
         JSON.stringify(c.extras||{})===JSON.stringify(extras);
     });
     if(dup>=0){
+      var _antes=INV[dup].stk;
       INV[dup].stk+=qty;
       if(!INV[dup].fotos)INV[dup].fotos=[];
       fotosForm.forEach(function(f){if(!INV[dup].fotos.some(function(x){return x.url===f.url;}))INV[dup].fotos.push(f);});
       sumados+=qty;
+      logBit('ingreso',eq+' | '+dor+' | T:'+t+' | '+ver+' | '+col+_extIng,'+'+qty+' uds. ('+_antes+' → '+INV[dup].stk+')');
     } else {
       INV.push({eq:eq,col:col,dor:dor,ver:ver,tal:t,año:año,stk:qty,id:Date.now()+i,extras:extras,fotos:fotosForm.map(function(f){return{url:f.url,principal:f.principal};}),fechaIngreso:new Date().toLocaleDateString('es-HN')});
       ingresados+=qty;
+      logBit('ingreso',eq+' | '+dor+' | T:'+t+' | '+ver+' | '+col+_extIng,'Talla nueva · +'+qty+' uds.');
     }
     if(el)el.value=0;
   });
@@ -14585,8 +14589,6 @@ function adj(i,d){
   var c=INV[i];
   var stkAntes=c.stk;
   c.stk+=d;
-  var extStr='';if(c.extras)Object.keys(c.extras).forEach(function(k){if(c.extras[k])extStr+=' · '+c.extras[k];});
-  logBit(d>0?'mod_suma':'mod_resta',c.eq+' | '+c.dor+' | T:'+c.tal+' | '+c.ver+' | '+c.col+extStr,(d>0?'+':'')+d+' uds. ('+stkAntes+' → '+c.stk+')');
   save();actualizarFechas();
   var agotado=INV[i].stk===0;
   var nuevoStk=INV[i].stk;
