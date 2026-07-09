@@ -76,12 +76,28 @@ onSnapshot(_docRef, function(snap) {
       var _editAbierto = document.getElementById('edit-modal-overlay') &&
                          document.getElementById('edit-modal-overlay').classList.contains('open');
       var _editClave = window._editModalClave || null;
+      // Guardar qué tarjetas tienen el modo "Ajustar stock" abierto
+      var _ajustesAbiertos = [];
+      document.querySelectorAll('[id^="tallas-ajus-"]').forEach(function(el){
+        if(el.style.display!=='none'){
+          _ajustesAbiertos.push(el.id.replace('tallas-ajus-',''));
+        }
+      });
       renderInv();
       actualizarFechas();
       mostrarToastSync();
       // Reabrir edit-modal si estaba abierto
       if (_editAbierto && _editClave && typeof abrirEditModal === 'function') {
         setTimeout(function(){ abrirEditModal(_editClave); }, 80);
+      }
+      // Reabrir los modos "Ajustar stock" que estaban abiertos
+      if (_ajustesAbiertos.length && typeof togAjuste === 'function') {
+        setTimeout(function(){
+          _ajustesAbiertos.forEach(function(cid){
+            var el=document.getElementById('tallas-ajus-'+cid);
+            if(el && el.style.display==='none') togAjuste(cid);
+          });
+        }, 80);
       }
     }
   } catch(e) { console.error('Error al recibir datos Firebase:', e); }
@@ -14155,7 +14171,7 @@ function renderInv(){
     var talFilasLectura=variantes.map(function(v){
       var agotado=v.stk===0;
       return'<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);'+(agotado?'opacity:0.5;':'')+'">'+
-        '<span style="font-size:0.88rem;font-weight:600;color:var(--color-text-primary);min-width:38px;">'+v.tal+'</span>'+
+        '<span style="font-size:0.88rem;font-weight:600;color:var(--color-text-primary);min-width:38px;">'+v.tal+(v.soloTienda?' <span style="font-size:0.52rem;font-weight:800;color:#fff;background:#A32D2D;border-radius:4px;padding:1px 4px;vertical-align:middle;">OFF</span>':'')+'</span>'+
         '<span style="font-size:0.82rem;color:var(--color-text-secondary);flex:1;padding:0 6px;text-align:center;">'+v.ver+'</span>'+
         '<span data-lect-idx="'+INV.indexOf(v)+'" style="font-size:1rem;font-weight:700;color:'+(agotado?'#A32D2D':'#0F6E56')+';min-width:30px;text-align:right;">'+
           (agotado?'Agotado':v.stk)+
@@ -14168,9 +14184,10 @@ function renderInv(){
     var talFilasAjuste=variantes.map(function(v){
       var idx=INV.indexOf(v);
       var agotado=v.stk===0;
+      var offOn=!!v.soloTienda;
       return'<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);'+(agotado?'opacity:0.65;':'')+'">'+
-        '<span style="font-size:0.88rem;font-weight:600;color:var(--color-text-primary);min-width:38px;">'+v.tal+'</span>'+
-        '<span style="font-size:0.75rem;color:var(--color-text-secondary);flex:1;padding:0 4px;text-align:center;">'+v.ver+'</span>'+
+        '<span style="font-size:0.88rem;font-weight:600;color:var(--color-text-primary);min-width:38px;">'+v.tal+'<span id="offbadge-'+idx+'" style="'+(offOn?'':'display:none;')+'font-size:0.52rem;font-weight:800;color:#fff;background:#A32D2D;border-radius:4px;padding:1px 4px;vertical-align:middle;margin-left:3px;">OFF</span></span>'+
+        '<button id="offbtn-'+idx+'" onclick="toggleOffline('+idx+')" title="'+(offOn?'OFF LINE (oculto del catálogo)':'ONLINE (visible en catálogo)')+'" style="font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:5px;cursor:pointer;touch-action:manipulation;border:none;background:'+(offOn?'#A32D2D':'#0F6E56')+';color:#fff;white-space:nowrap;">'+(offOn?'OFF':'ON')+'</button>'+
         '<div style="display:flex;align-items:center;gap:5px;">'+
           '<button onclick="adj('+idx+',-1)" style="'+btnSt+'">−</button>'+
           '<span data-adj-idx="'+idx+'" style="font-size:0.95rem;font-weight:700;color:'+(agotado?'#A32D2D':'#0F6E56')+';min-width:26px;text-align:center;">'+(agotado?'0':v.stk)+'</span>'+
@@ -14207,7 +14224,7 @@ function renderInv(){
     html+='<div class="inv-item'+(borde?' '+borde:'')+'" data-modelo-key="'+k.replace(/"/g,'&quot;')+'">'+
       fotoHtml+
       '<div class="inv-top">'+
-        '<div><div class="inv-name">'+rep.eq+(rep.soloTienda?' <span style="font-size:0.6rem;font-weight:700;color:#7B3F00;background:#FAEEDA;border-radius:5px;padding:1px 6px;vertical-align:middle;">🏪 SOLO TIENDA</span>':'')+'</div><div class="inv-sub">'+rep.dor+'</div></div>'+
+        '<div><div class="inv-name">'+rep.eq+'</div><div class="inv-sub">'+rep.dor+'</div></div>'+
         '<span class="tag">'+sw(rep.col)+rep.col+'</span>'+
       '</div>'+
       '<div class="tags"><span class="tag">'+rep.año+'</span>'+extTags+'</div>'+
@@ -14235,6 +14252,7 @@ function renderInv(){
             :'';
           return '<div id="tallas-ajus-'+cardId+'" style="display:none;">'+
             '<div style="font-size:0.65rem;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:4px 8px;margin-bottom:4px;">⚠️ Los cambios de cantidad NO se registran como venta</div>'+
+            '<button onclick="toggleOfflineModelo('+repIdx+')" style="width:100%;padding:6px;margin-bottom:6px;border:0.5px dashed #A32D2D;border-radius:6px;background:none;color:#A32D2D;font-size:0.68rem;font-weight:600;cursor:pointer;touch-action:manipulation;">⏻ OFF/ON LINE — todo el modelo</button>'+
             talFilasAjuste+
             addTallaHtml+
             '<button onclick="togAjuste(\''+cardId+'\''+')" style="width:100%;padding:7px;margin-top:8px;border:none;border-radius:var(--border-radius-md);background:#e8f8f0;color:#0F6E56;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">✓ Listo</button>'+
@@ -14582,6 +14600,39 @@ function togAjuste(cardId){
       ?'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Ajustar stock'
       :'✓ Cerrar ajuste';
   }
+}
+function toggleOffline(i){
+  if(!INV[i])return;
+  INV[i].soloTienda=!INV[i].soloTienda;
+  var c=INV[i];
+  var off=!!c.soloTienda;
+  var extStr='';if(c.extras)Object.keys(c.extras).forEach(function(k){if(c.extras[k])extStr+=' · '+c.extras[k];});
+  logBit('edicion',c.eq+' | '+c.dor+' | T:'+c.tal+' | '+c.ver+' | '+c.col+extStr,'OFF LINE: '+(off?'activado':'desactivado'));
+  // Actualizar solo el botón y badge de esta talla, SIN cerrar la edición
+  var btn=document.getElementById('offbtn-'+i);
+  if(btn){
+    btn.style.background=off?'#A32D2D':'#0F6E56';
+    btn.textContent=off?'OFF':'ON';
+    btn.title=off?'OFF LINE (oculto del catálogo)':'ONLINE (visible en catálogo)';
+  }
+  var badge=document.getElementById('offbadge-'+i);
+  if(badge){badge.style.display=off?'':'none';}
+  save();actualizarFechas();
+}
+function toggleOfflineModelo(repIdx){
+  var rep=INV[repIdx];
+  if(!rep)return;
+  var clave=claveModelo(rep);
+  var variantes=INV.filter(function(c){return claveModelo(c)===clave;});
+  // Si TODAS están offline, las activa (online). Si hay alguna online, pone TODAS offline.
+  var todasOff=variantes.every(function(v){return v.soloTienda;});
+  var nuevoEstado=!todasOff;
+  variantes.forEach(function(v){v.soloTienda=nuevoEstado;});
+  var extStr='';if(rep.extras)Object.keys(rep.extras).forEach(function(k){if(rep.extras[k])extStr+=' · '+rep.extras[k];});
+  logBit('edicion',rep.eq+' | '+rep.dor+' | '+rep.ver+' | '+rep.col+extStr,'OFF LINE modelo completo: '+(nuevoEstado?'activado':'desactivado')+' ('+variantes.length+' tallas)');
+  save();actualizarFechas();renderInv();
+  // Reabrir el ajuste de esta tarjeta tras renderizar
+  setTimeout(function(){togAjuste('card-'+repIdx);},60);
 }
 function adj(i,d){
   if(!INV[i])return;
@@ -15239,10 +15290,6 @@ function abrirEditModal(claveK){
     '<div class="fg"><label>Versión</label><select id="em-ver">'+opVer+'</select></div></div>'+
     '<div class="fg"><label>Año</label><select id="em-año">'+opAño+'</select></div>'+
     (extrasHtml?'<div class="form-row">'+extrasHtml+'</div>':'')+
-    '<label style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:0.82rem;color:var(--color-text-primary);">'+
-      '<input type="checkbox" id="em-solotienda"'+(rep.soloTienda?' checked':'')+' style="width:18px;height:18px;cursor:pointer;">'+
-      '<span>🏪 Solo tienda <span style="color:var(--color-text-secondary);font-size:0.72rem;">(no aparece en el catálogo de clientes)</span></span>'+
-    '</label>'+
     '<div id="em-msg" class="msg" style="margin-top:8px;"></div>'+
     '<button class="btn btn-gr" style="margin-top:10px;" onclick="guardarEditModal(\''+claveK.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')" >'+
       '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'+
@@ -15270,19 +15317,16 @@ function guardarEditModal(claveK){
     var el=document.getElementById('em-ext-'+ei);
     if(el&&el.value)nuevosExtras[ex.nombre]=el.value;
   });
-  var nuevoSoloTienda=document.getElementById('em-solotienda')?document.getElementById('em-solotienda').checked:false;
 
   // Guardar valores ORIGINALES antes de modificar nada
   var rep0=variantes[0];
   var antesEq=rep0.eq, antesDor=rep0.dor, antesCol=rep0.col, antesVer=rep0.ver, antesAño=String(rep0.año);
   var antesExtras=JSON.parse(JSON.stringify(rep0.extras||{}));
-  var antesSoloTienda=!!rep0.soloTienda;
 
-  // Actualizar campos comunes en todas las variantes (stock intacto)
+  // Actualizar campos comunes en todas las variantes (stock y OFF LINE por talla intactos)
   variantes.forEach(function(v){
     v.eq=nuevoEq;v.col=nuevoCol;v.dor=nuevoDor;v.ver=nuevoVer;v.año=nuevoAño;
     v.extras=JSON.parse(JSON.stringify(nuevosExtras));
-    v.soloTienda=nuevoSoloTienda;
   });
 
   // Detectar cambios campo por campo usando valores originales
@@ -15298,7 +15342,6 @@ function guardarEditModal(claveK){
     var despues=nuevosExtras[k]||'(vacío)';
     if(antes!==despues) cambios.push(k+': "'+antes+'" → "'+despues+'"');
   });
-  if(antesSoloTienda!==nuevoSoloTienda) cambios.push('Solo tienda: '+(antesSoloTienda?'Sí':'No')+' → '+(nuevoSoloTienda?'Sí':'No'));
   var detalle=cambios.length?cambios.join(' | '):'Sin cambios detectados';
   logBit('edicion',nuevoEq+' | '+nuevoDor,detalle);
   save();
