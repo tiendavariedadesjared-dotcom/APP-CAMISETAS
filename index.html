@@ -13168,10 +13168,10 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
         Productos OFF LINE
       </div>
-      <p style="font-size:0.75rem;color:var(--color-text-secondary);line-height:1.55;margin-bottom:10px;">Exporta la lista de todas las tallas marcadas como OFF LINE (ocultas del catálogo de clientes).</p>
+      <p style="font-size:0.75rem;color:var(--color-text-secondary);line-height:1.55;margin-bottom:10px;">Exporta la lista de todas las tallas marcadas como OFF LINE (no disponibles para revendedores).</p>
       <button class="btn btn-gr" onclick="exportarOffline()">
         <svg viewBox="0 0 24 24" width="17" height="17"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Exportar lista OFF LINE (.txt)
+        Exportar lista (.txt)
       </button>
     </div>
     <!-- RESPALDO JSON -->
@@ -15657,9 +15657,8 @@ function exportarOffline(){
            (ordenTal[a.tal]||99)-(ordenTal[b.tal]||99);
   });
   var fecha=new Date().toLocaleDateString('es-HN')+' '+new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'});
-  var lines=['PRODUCTOS OFF LINE (ocultos del catálogo de clientes)','Generado: '+fecha,'='.repeat(60),''];
+  var lines=['PRODUCTOS NO DISPONIBLES PARA REVENDEDORES','Generado: '+fecha,'='.repeat(60)];
   var claveActual=null;
-  var totalUds=0;
   off.forEach(function(c){
     var ext='';if(c.extras)Object.keys(c.extras).forEach(function(k){if(c.extras[k])ext+=' · '+c.extras[k];});
     var clave=c.eq+'|'+c.dor+'|'+c.ver+'|'+c.col+'|'+c.año+ext;
@@ -15668,23 +15667,19 @@ function exportarOffline(){
       lines.push('');
       lines.push(c.eq+' | '+c.dor+' | '+c.ver+' | '+c.col+' | '+c.año+ext);
     }
-    lines.push('   T:'+c.tal+'  → stock: '+c.stk);
-    totalUds+=c.stk;
+    lines.push('   '+c.tal);
   });
-  lines.push('');
-  lines.push('='.repeat(60));
-  lines.push('TOTAL: '+off.length+' tallas OFF LINE · '+totalUds+' unidades');
 
   var txt=lines.join('\n');
   try{
     var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
     var url=URL.createObjectURL(blob);
-    var nombre='OFFLINE_'+fmtNombre(new Date())+'.txt';
+    var nombre='NO_DISPONIBLES_REVENDEDORES_'+fmtNombre(new Date())+'.txt';
     var a=document.createElement('a');
     a.href=url;a.download=nombre;
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     setTimeout(function(){URL.revokeObjectURL(url);},2000);
-    alert('✓ Lista descargada: '+off.length+' tallas OFF LINE · '+totalUds+' unidades');
+    alert('✓ Lista descargada: '+off.length+' tallas no disponibles para revendedores');
   }catch(e){
     alert('No se pudo exportar: '+e.message);
   }
