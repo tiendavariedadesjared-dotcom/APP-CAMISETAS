@@ -14185,14 +14185,16 @@ function renderInv(){
       var idx=INV.indexOf(v);
       var agotado=v.stk===0;
       var offOn=!!v.soloTienda;
-      return'<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);'+(agotado?'opacity:0.65;':'')+'">'+
-        '<span style="font-size:0.88rem;font-weight:600;color:var(--color-text-primary);min-width:38px;">'+v.tal+'<span id="offbadge-'+idx+'" style="'+(offOn?'':'display:none;')+'font-size:0.52rem;font-weight:800;color:#fff;background:#A32D2D;border-radius:4px;padding:1px 4px;vertical-align:middle;margin-left:3px;">OFF</span></span>'+
-        '<button id="offbtn-'+idx+'" onclick="toggleOffline('+idx+')" title="'+(offOn?'OFF LINE (oculto del catálogo)':'ONLINE (visible en catálogo)')+'" style="font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:5px;cursor:pointer;touch-action:manipulation;border:none;background:'+(offOn?'#A32D2D':'#0F6E56')+';color:#fff;white-space:nowrap;">'+(offOn?'OFF':'ON')+'</button>'+
-        '<div style="display:flex;align-items:center;gap:5px;">'+
+      return'<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);'+(agotado?'opacity:0.65;':'')+'">'+
+        '<span style="font-size:0.88rem;font-weight:600;color:var(--color-text-primary);min-width:34px;flex-shrink:0;">'+v.tal+'</span>'+
+        '<button id="offbtn-'+idx+'" onclick="toggleOffline('+idx+')" title="'+(offOn?'OFF LINE (oculto del catálogo)':'ONLINE (visible en catálogo)')+'" style="font-size:0.55rem;font-weight:800;padding:3px 6px;border-radius:5px;cursor:pointer;touch-action:manipulation;border:none;background:'+(offOn?'#A32D2D':'#0F6E56')+';color:#fff;white-space:nowrap;flex-shrink:0;">'+(offOn?'OFF':'ON')+'</button>'+
+        '<span id="offbadge-'+idx+'" style="'+(offOn?'':'display:none;')+'"></span>'+
+        '<span style="font-size:0.75rem;color:var(--color-text-secondary);flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">'+v.ver+'</span>'+
+        '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">'+
           '<button onclick="adj('+idx+',-1)" style="'+btnSt+'">−</button>'+
           '<span data-adj-idx="'+idx+'" style="font-size:0.95rem;font-weight:700;color:'+(agotado?'#A32D2D':'#0F6E56')+';min-width:26px;text-align:center;">'+(agotado?'0':v.stk)+'</span>'+
           '<button onclick="adjConTipo('+idx+')" style="'+btnSt+'">+</button>'+
-          '<button onclick="del('+idx+')" style="width:30px;height:30px;border:none;border-radius:6px;background:#FCEBEB;color:#A32D2D;font-size:0.72rem;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">'+
+          '<button onclick="del('+idx+')" style="width:30px;height:30px;border:none;border-radius:6px;background:#FCEBEB;color:#A32D2D;font-size:0.72rem;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;flex-shrink:0;">'+
             '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>'+
           '</button>'+
         '</div>'+
@@ -14608,15 +14610,13 @@ function toggleOffline(i){
   var off=!!c.soloTienda;
   var extStr='';if(c.extras)Object.keys(c.extras).forEach(function(k){if(c.extras[k])extStr+=' · '+c.extras[k];});
   logBit('edicion',c.eq+' | '+c.dor+' | T:'+c.tal+' | '+c.ver+' | '+c.col+extStr,'OFF LINE: '+(off?'activado':'desactivado'));
-  // Actualizar solo el botón y badge de esta talla, SIN cerrar la edición
+  // Actualizar solo el botón de esta talla, SIN cerrar la edición
   var btn=document.getElementById('offbtn-'+i);
   if(btn){
     btn.style.background=off?'#A32D2D':'#0F6E56';
     btn.textContent=off?'OFF':'ON';
     btn.title=off?'OFF LINE (oculto del catálogo)':'ONLINE (visible en catálogo)';
   }
-  var badge=document.getElementById('offbadge-'+i);
-  if(badge){badge.style.display=off?'':'none';}
   save();actualizarFechas();
 }
 function toggleOfflineModelo(repIdx){
