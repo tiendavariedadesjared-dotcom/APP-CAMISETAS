@@ -69,7 +69,7 @@ onSnapshot(_docRef, function(snap) {
     if (d.extras !== undefined){ window.EXTRAS = JSON.parse(d.extras);localStorage.setItem(window.EK, d.extras); }
     if (d.listas !== undefined){ window.L     = JSON.parse(d.listas);localStorage.setItem(window.LK, d.listas); }
     if (d.bit !== undefined)   { window.BITACORA = JSON.parse(d.bit); if(typeof BITACORA!=='undefined')BITACORA=window.BITACORA; try{localStorage.setItem(BK, d.bit);}catch(e){} }
-    if (d.cons !== undefined)  { window.CONSIGNACIONES = JSON.parse(d.cons); try{localStorage.setItem('cj_cons', d.cons);}catch(e){} }
+    if (d.cons !== undefined)  { window.CONSIGNACIONES = JSON.parse(d.cons); if(typeof CONSIGNACIONES!=='undefined')CONSIGNACIONES=window.CONSIGNACIONES; try{localStorage.setItem('cj_cons', d.cons);}catch(e){} }
     // Re-renderizar si la app ya está lista
     if (typeof renderInv === 'function') {
       // Guardar estado del edit-modal y modo ajuste antes de re-renderizar
@@ -13036,7 +13036,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <!-- ═══ TOOLS ═══ -->
   <div id="sec-tools" class="section" style="background:var(--color-background-secondary);">
     <!-- CATÁLOGO -->
-    <div class="card" style="margin-top:4px;">
+    <div class="card" style="display:none;border-left:4px solid #2E86DE;margin-top:4px;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         Catálogo para clientes
@@ -13057,7 +13057,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       <p style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:6px;line-height:1.5;">① Generá el catálogo · ② Abrí Netlify o Tiiny Host · ③ Arrastrá el archivo · ④ Copiá el enlace y mandalo por WhatsApp</p>
     </div>
     <!-- ESTADÍSTICAS -->
-    <div class="card">
+    <div class="card" style="border-left:4px solid #8E44AD;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Reporte de estadísticas
@@ -13097,7 +13097,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </button>
     </div>
     <!-- RESUMEN -->
-    <div class="card">
+    <div class="card" style="display:none;border-left:4px solid #16A085;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Resumen de stock
@@ -13134,7 +13134,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </button>
     </div>
     <!-- BITÁCORA -->
-    <div class="card" id="card-bitacora">
+    <div class="card" style="border-left:4px solid #E67E22;" id="card-bitacora">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
         Bitácora de movimientos
@@ -13162,8 +13162,21 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         <div id="bit-lista" style="display:none;margin-top:6px;"></div>
       </div>
     </div>
+    <!-- CONSIGNACIÓN -->
+    <div class="card" style="border-left:4px solid #C0392B;">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+        Consignación
+      </div>
+      <p style="font-size:0.75rem;color:var(--color-text-secondary);line-height:1.55;margin-bottom:10px;">Entregá productos a una persona para que los venda. Se descuentan del stock. Al liquidar, lo devuelto vuelve al stock.</p>
+      <button class="btn btn-gr" onclick="abrirNuevaConsig()" style="margin-bottom:8px;">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nueva consignación
+      </button>
+      <div id="consig-lista"></div>
+    </div>
     <!-- LISTA OFF LINE -->
-    <div class="card">
+    <div class="card" style="border-left:4px solid #7F8C8D;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
         Productos OFF LINE
@@ -13175,7 +13188,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </button>
     </div>
     <!-- RESPALDO JSON -->
-    <div class="card">
+    <div class="card" style="border-left:4px solid #27AE60;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Respaldo completo
@@ -13190,7 +13203,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </button>
     </div>
     <!-- CAMBIOS Y DEVOLUCIONES -->
-    <div class="card">
+    <div class="card" style="display:none;border-left:4px solid #D4AC0D;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
         Cambios y devoluciones
@@ -13199,7 +13212,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       <button onclick="renderCambios()" style="font-size:0.72rem;color:var(--color-text-secondary);background:none;border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 12px;cursor:pointer;touch-action:manipulation;margin-top:8px;">↺ Actualizar</button>
     </div>
     <!-- DEMANDA SIN STOCK -->
-    <div class="card">
+    <div class="card" style="display:none;border-left:4px solid #E84393;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Registrar pedido sin stock
@@ -13224,7 +13237,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </button>
     </div>
     <!-- CARGAR RESPALDO -->
-    <div class="card">
+    <div class="card" style="border-left:4px solid #2980B9;">
       <div class="card-title">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Cargar respaldo
@@ -13387,6 +13400,44 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <button onclick="_scanCerrar()" style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 32px;border:none;border-radius:30px;background:#fff;color:#111;font-size:0.9rem;font-weight:700;cursor:pointer;touch-action:manipulation;z-index:2;">Cerrar</button>
 </div>
 
+<!-- MODAL NUEVA CONSIGNACIÓN -->
+<div id="mod-consig" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;">
+  <div style="background:var(--color-background-primary);border-radius:16px;padding:16px 14px;width:100%;max-width:480px;margin:auto;">
+    <div style="font-size:0.95rem;font-weight:700;color:var(--color-text-primary);margin-bottom:10px;">Nueva consignación</div>
+    <label style="font-size:0.75rem;font-weight:600;color:var(--color-text-secondary);display:block;margin-bottom:4px;">¿A quién se le entrega?</label>
+    <input type="text" id="consig-quien" placeholder="Nombre de la persona" style="width:100%;padding:10px;border:1px solid var(--color-border-secondary);border-radius:8px;font-size:0.9rem;box-sizing:border-box;margin-bottom:12px;background:var(--color-background-secondary);color:var(--color-text-primary);">
+
+    <!-- Pedido en construcción -->
+    <div id="consig-items" style="margin-bottom:10px;"></div>
+
+    <!-- Filtros -->
+    <div style="font-size:0.75rem;font-weight:600;color:var(--color-text-secondary);margin-bottom:6px;">Agregar productos:</div>
+    <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
+      <select id="cf-eq" onchange="renderConsigGrid()" style="flex:1;min-width:0;padding:7px;border:1px solid var(--color-border-secondary);border-radius:7px;font-size:0.72rem;background:var(--color-background-secondary);color:var(--color-text-primary);"><option value="">Equipo</option></select>
+      <select id="cf-año" onchange="renderConsigGrid()" style="flex:1;min-width:0;padding:7px;border:1px solid var(--color-border-secondary);border-radius:7px;font-size:0.72rem;background:var(--color-background-secondary);color:var(--color-text-primary);"><option value="">Año</option></select>
+      <select id="cf-ver" onchange="renderConsigGrid()" style="flex:1;min-width:0;padding:7px;border:1px solid var(--color-border-secondary);border-radius:7px;font-size:0.72rem;background:var(--color-background-secondary);color:var(--color-text-primary);"><option value="">Versión</option></select>
+    </div>
+
+    <!-- Grilla de productos -->
+    <div id="consig-grid" style="max-height:44vh;overflow-y:auto;margin-bottom:12px;"></div>
+
+    <button onclick="guardarNuevaConsig()" style="width:100%;padding:12px;border:none;border-radius:8px;background:#1D9E75;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:8px;">Confirmar entrega (descuenta del stock)</button>
+    <button onclick="cerrarConsig()" style="width:100%;padding:9px;border:none;background:none;color:var(--color-text-secondary);font-size:0.82rem;cursor:pointer;touch-action:manipulation;">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL LIQUIDAR CONSIGNACIÓN -->
+<div id="mod-liquidar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;">
+  <div style="background:var(--color-background-primary);border-radius:16px;padding:18px 16px;width:100%;max-width:440px;margin:auto;">
+    <div style="font-size:0.95rem;font-weight:700;color:var(--color-text-primary);margin-bottom:4px;">Liquidar consignación</div>
+    <div id="liquidar-quien" style="font-size:0.8rem;color:var(--color-text-secondary);margin-bottom:12px;"></div>
+    <div style="font-size:0.72rem;color:var(--color-text-secondary);margin-bottom:10px;">Por cada producto, indicá cuánto se vendió. El resto vuelve al stock automáticamente.</div>
+    <div id="liquidar-items" style="margin-bottom:14px;"></div>
+    <button onclick="confirmarLiquidacion()" style="width:100%;padding:12px;border:none;border-radius:8px;background:#1D9E75;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:8px;">Confirmar liquidación</button>
+    <button onclick="cerrarLiquidar()" style="width:100%;padding:9px;border:none;background:none;color:var(--color-text-secondary);font-size:0.82rem;cursor:pointer;touch-action:manipulation;">Cancelar</button>
+  </div>
+</div>
+
 <div id="toast-sync">☁️ Sincronizado</div>
 
 <script>
@@ -13476,6 +13527,8 @@ var DEM=JSON.parse(localStorage.getItem(DK)||'[]');
 window.DEM=DEM;
 var EXTRAS=JSON.parse(localStorage.getItem(EK)||'[]');
 window.EXTRAS=EXTRAS;
+var CONSIGNACIONES=JSON.parse(localStorage.getItem('cj_cons')||'[]');
+window.CONSIGNACIONES=CONSIGNACIONES;
 EXTRAS.forEach(function(ex){ex.valores.sort(function(a,b){return a.localeCompare(b,'es');});});
 
 // Migración: renombrar "Genero/Tamaño" a "Categoría"
@@ -13505,9 +13558,10 @@ var abierto={};
 
 function save(){
   try{localStorage.setItem(LK,JSON.stringify(L));localStorage.setItem(IK,JSON.stringify(INV));localStorage.setItem(SK,JSON.stringify(SAL));
-  localStorage.setItem(CK,JSON.stringify(CAMB));localStorage.setItem(DK,JSON.stringify(DEM));localStorage.setItem(EK,JSON.stringify(EXTRAS));}catch(e){}
+  localStorage.setItem(CK,JSON.stringify(CAMB));localStorage.setItem(DK,JSON.stringify(DEM));localStorage.setItem(EK,JSON.stringify(EXTRAS));
+  localStorage.setItem('cj_cons',JSON.stringify(CONSIGNACIONES));}catch(e){}
   // Sincronizar con Firebase
-  window.INV=INV;window.SAL=SAL;window.CAMB=CAMB;window.DEM=DEM;window.EXTRAS=EXTRAS;window.L=L;
+  window.INV=INV;window.SAL=SAL;window.CAMB=CAMB;window.DEM=DEM;window.EXTRAS=EXTRAS;window.L=L;window.CONSIGNACIONES=CONSIGNACIONES;
   if(typeof window._fbGuardar==='function') window._fbGuardar();
 }
 function pad(n){return n<10?'0'+n:''+n;}
@@ -13543,6 +13597,7 @@ function showTab(t){
   if(t==='tools'){
     fillBitFiltros();renderBitacora();
     fillResumenFiltros();fillForm(['d-eq','d-col','d-dor','d-tal','d-ver','d-año']);fillDashFiltros();renderCambios();
+    renderConsigLista();
     var el=document.getElementById('resp-ultimo');if(el)el.textContent=localStorage.getItem(RK)||'Ninguno aún';
     // Llenar filtros de estadísticas
     var eqs=[...new Set(INV.map(function(c){return c.eq;}))].sort();
@@ -15645,6 +15700,284 @@ function addExtra(i){var inp=document.getElementById('inp-ext-'+i),v=inp.value.t
 function remExtra(i,v){EXTRAS[i].valores=EXTRAS[i].valores.filter(function(x){return x!==v;});save();renderExtras();}
 
 // ── EXPORTAR RESPALDO (JSON completo) ────────────────────
+// ── CONSIGNACIÓN ─────────────────────────────────────────
+var _consigItems=[]; // items temporales de la nueva consignación
+var _liquidarIdx=-1;  // índice de la consignación que se está liquidando
+
+function labelVarianteConsig(c){
+  var ext='';if(c.extras)Object.keys(c.extras).forEach(function(k){if(c.extras[k])ext+=' · '+c.extras[k];});
+  return c.eq+' | '+c.dor+' | T:'+c.tal+' | '+c.ver+' | '+c.col+' · '+c.año+ext;
+}
+
+function abrirNuevaConsig(){
+  _consigItems=[];
+  document.getElementById('consig-quien').value='';
+  var conStk=INV.filter(function(c){return c.stk>0;});
+  var eqs=[...new Set(conStk.map(function(c){return c.eq;}))].sort();
+  var años=[...new Set(conStk.map(function(c){return c.año;}))].sort(function(a,b){return b-a;});
+  var vers=[...new Set(conStk.map(function(c){return c.ver;}))].sort();
+  document.getElementById('cf-eq').innerHTML='<option value="">Equipo</option>'+eqs.map(function(e){return '<option value="'+String(e).replace(/"/g,'&quot;')+'">'+e+'</option>';}).join('');
+  document.getElementById('cf-año').innerHTML='<option value="">Año</option>'+años.map(function(a){return '<option value="'+a+'">'+a+'</option>';}).join('');
+  document.getElementById('cf-ver').innerHTML='<option value="">Versión</option>'+vers.map(function(v){return '<option value="'+String(v).replace(/"/g,'&quot;')+'">'+v+'</option>';}).join('');
+  renderConsigItems();
+  renderConsigGrid();
+  document.getElementById('mod-consig').style.display='flex';
+}
+
+function fotoPrincipalUrl(c){
+  if(c.fotos&&c.fotos.length){
+    var p=c.fotos.find(function(f){return f.principal;});
+    return (p||c.fotos[0]).url;
+  }
+  return '';
+}
+
+function renderConsigGrid(){
+  var fEq=document.getElementById('cf-eq').value;
+  var fAño=document.getElementById('cf-año').value;
+  var fVer=document.getElementById('cf-ver').value;
+  var lista=INV.filter(function(c){
+    if(c.stk<=0)return false;
+    if(fEq&&c.eq!==fEq)return false;
+    if(fAño&&String(c.año)!==fAño)return false;
+    if(fVer&&c.ver!==fVer)return false;
+    return true;
+  });
+  var TORDEN=['S','M','L','XL','2XL','3XL','4XL'];
+  lista.sort(function(a,b){
+    // Primero agrupar por modelo (todo menos talla), luego ordenar tallas dentro
+    var ma=claveModelo(a), mb=claveModelo(b);
+    if(ma!==mb){
+      // Ordenar modelos por equipo, año desc, versión, color
+      return String(a.eq).localeCompare(String(b.eq),'es')||
+             (b.año-a.año)||
+             String(a.ver).localeCompare(String(b.ver),'es')||
+             String(a.col).localeCompare(String(b.col),'es');
+    }
+    // Mismo modelo: ordenar por talla
+    var ia=TORDEN.indexOf(a.tal),ib=TORDEN.indexOf(b.tal);
+    if(ia>=0&&ib>=0)return ia-ib;
+    return String(a.tal).localeCompare(String(b.tal));
+  });
+  var grid=document.getElementById('consig-grid');
+  if(!lista.length){
+    grid.innerHTML='<div style="font-size:0.75rem;color:var(--color-text-secondary);text-align:center;padding:16px;">Sin productos con esos filtros.</div>';
+    return;
+  }
+  var claveAnterior=null;
+  grid.innerHTML=lista.map(function(c){
+    var idx=INV.indexOf(c);
+    var yaEsta=_consigItems.some(function(it){return it.invIdx===idx;});
+    var foto=fotoPrincipalUrl(c);
+    var ext='';if(c.extras)Object.keys(c.extras).forEach(function(k){if(c.extras[k])ext+=' · '+c.extras[k];});
+    // Encabezado de modelo cuando cambia
+    var encabezado='';
+    var claveActual=claveModelo(c);
+    if(claveActual!==claveAnterior){
+      claveAnterior=claveActual;
+      encabezado='<div style="font-size:0.68rem;font-weight:700;color:var(--color-text-primary);background:var(--color-background-secondary);padding:5px 8px;border-radius:6px;margin:8px 0 3px;">'+c.eq+' · '+c.dor+' · '+c.ver+' · '+c.col+' · '+c.año+ext+'</div>';
+    }
+    return encabezado+'<div style="display:flex;align-items:center;gap:8px;padding:6px;border-bottom:0.5px solid var(--color-border-tertiary);'+(yaEsta?'opacity:0.5;':'')+'">'+
+      (foto?'<img src="'+foto+'" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;" onerror="this.style.opacity=0.2">':'<div style="width:40px;height:40px;border-radius:6px;background:var(--color-background-secondary);flex-shrink:0;"></div>')+
+      '<div style="flex:1;min-width:0;font-size:0.72rem;color:var(--color-text-primary);line-height:1.25;font-weight:600;">T: '+c.tal+'<br><span style="color:var(--color-text-secondary);font-weight:400;">stock: '+c.stk+'</span></div>'+
+      (yaEsta
+        ? '<span style="font-size:0.65rem;color:#1D9E75;font-weight:700;flex-shrink:0;">✓ agregado</span>'
+        : '<button onclick="agregarItemConsig('+idx+')" style="width:30px;height:30px;border:none;border-radius:6px;background:#1D9E75;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;flex-shrink:0;touch-action:manipulation;">+</button>')+
+    '</div>';
+  }).join('');
+}
+
+function agregarItemConsig(invIdx){
+  var c=INV[invIdx];
+  if(!c)return;
+  if(_consigItems.some(function(it){return it.invIdx===invIdx;})){return;}
+  _consigItems.push({invIdx:invIdx, qty:1});
+  renderConsigItems();
+  renderConsigGrid();
+}
+
+function quitarItemConsig(i){
+  _consigItems.splice(i,1);
+  renderConsigItems();
+  renderConsigGrid();
+}
+
+function cambiarQtyConsig(i,val){
+  var it=_consigItems[i];
+  var c=INV[it.invIdx];
+  var q=parseInt(val)||1;
+  if(q<1)q=1;
+  if(q>c.stk)q=c.stk;
+  it.qty=q;
+  renderConsigItems();
+}
+
+function renderConsigItems(){
+  var cont=document.getElementById('consig-items');
+  if(!_consigItems.length){
+    cont.innerHTML='<div style="font-size:0.72rem;color:var(--color-text-secondary);text-align:center;padding:8px;background:var(--color-background-secondary);border-radius:8px;">Pedido vacío. Agregá productos abajo. 👇</div>';
+    return;
+  }
+  var total=_consigItems.reduce(function(s,it){return s+it.qty;},0);
+  cont.innerHTML='<div style="font-size:0.72rem;font-weight:700;color:var(--color-text-primary);margin-bottom:5px;">📦 Pedido: '+_consigItems.length+' producto(s) · '+total+' uds.</div>'+
+    _consigItems.map(function(it,i){
+    var c=INV[it.invIdx];
+    var foto=fotoPrincipalUrl(c);
+    return '<div style="display:flex;align-items:center;gap:7px;padding:6px;background:#EAF7F1;border-radius:8px;margin-bottom:5px;">'+
+      (foto?'<img src="'+foto+'" style="width:34px;height:34px;border-radius:5px;object-fit:cover;flex-shrink:0;" onerror="this.style.opacity=0.2">':'')+
+      '<div style="flex:1;min-width:0;font-size:0.68rem;color:#0a5c3f;line-height:1.25;">'+c.eq+' '+c.dor+' · T:'+c.tal+' · '+c.ver+'<br><span style="opacity:0.7;">'+c.col+' · disp: '+c.stk+'</span></div>'+
+      '<input type="number" min="1" max="'+c.stk+'" value="'+it.qty+'" onchange="cambiarQtyConsig('+i+',this.value)" style="width:46px;padding:5px;border:1px solid #9ed0bb;border-radius:6px;font-size:0.82rem;text-align:center;background:#fff;color:#0a5c3f;">'+
+      '<button onclick="quitarItemConsig('+i+')" style="width:26px;height:26px;border:none;border-radius:6px;background:#FCEBEB;color:#A32D2D;font-size:0.85rem;cursor:pointer;flex-shrink:0;">×</button>'+
+    '</div>';
+  }).join('');
+}
+
+function guardarNuevaConsig(){
+  var quien=document.getElementById('consig-quien').value.trim();
+  if(!quien){alert('Escribí a quién se le entrega.');return;}
+  if(!_consigItems.length){alert('Agregá al menos un producto.');return;}
+  // Validar stock una vez más
+  for(var i=0;i<_consigItems.length;i++){
+    var c=INV[_consigItems[i].invIdx];
+    if(_consigItems[i].qty>c.stk){alert('No hay suficiente stock de '+c.eq+' T:'+c.tal);return;}
+  }
+  // Construir items con TODAS las variables + qty
+  var items=_consigItems.map(function(it){
+    var c=INV[it.invIdx];
+    return {
+      eq:c.eq,dor:c.dor,tal:c.tal,ver:c.ver,col:c.col,año:c.año,
+      extras:JSON.parse(JSON.stringify(c.extras||{})),
+      qty:it.qty, vendido:0, devuelto:0
+    };
+  });
+  // Descontar del stock
+  _consigItems.forEach(function(it){
+    INV[it.invIdx].stk-=it.qty;
+  });
+  // Crear la consignación
+  var consig={
+    quien:quien,
+    fecha:new Date().toLocaleDateString('es-HN'),
+    fechaISO:new Date().toISOString(),
+    estado:'activa',
+    items:items
+  };
+  CONSIGNACIONES.push(consig);
+  // Registrar en bitácora
+  var totalUds=items.reduce(function(s,it){return s+it.qty;},0);
+  logBit('consignacion',quien,'Entregó '+totalUds+' uds. en consignación ('+items.length+' productos)');
+  save();actualizarFechas();
+  cerrarConsig();
+  renderConsigLista();
+  renderInv();
+  alert('✓ Consignación registrada. Se descontaron '+totalUds+' unidades del stock.');
+}
+
+function cerrarConsig(){
+  document.getElementById('mod-consig').style.display='none';
+  _consigItems=[];
+}
+
+function renderConsigLista(){
+  var cont=document.getElementById('consig-lista');
+  if(!cont)return;
+  var activas=CONSIGNACIONES.map(function(c,idx){return{c:c,idx:idx};}).filter(function(o){return String(o.c.estado).toLowerCase()==='activa';});
+  if(!activas.length){
+    cont.innerHTML='<div style="font-size:0.75rem;color:var(--color-text-secondary);text-align:center;padding:10px;">No hay consignaciones activas.</div>';
+    return;
+  }
+  // Ordenar por fecha más reciente
+  activas.sort(function(a,b){return (b.c.fechaISO||'').localeCompare(a.c.fechaISO||'');});
+  cont.innerHTML='<div style="font-size:0.72rem;font-weight:600;color:var(--color-text-secondary);margin:10px 0 6px;">Consignaciones activas ('+activas.length+')</div>'+
+    activas.map(function(o){
+      var c=o.c;
+      var totalPend=c.items.reduce(function(s,it){return s+(it.qty-it.vendido-it.devuelto);},0);
+      return '<div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:10px;margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+          '<div style="font-size:0.85rem;font-weight:700;color:var(--color-text-primary);">'+c.quien+'</div>'+
+          '<div style="font-size:0.7rem;color:var(--color-text-secondary);">'+c.fecha+'</div>'+
+        '</div>'+
+        '<div style="font-size:0.72rem;color:var(--color-text-secondary);margin-bottom:8px;">'+c.items.length+' producto(s) · '+totalPend+' uds. pendientes</div>'+
+        '<button onclick="abrirLiquidar('+o.idx+')" style="width:100%;padding:8px;border:0.5px solid #1a56a0;border-radius:6px;background:none;color:#1a56a0;font-size:0.75rem;font-weight:600;cursor:pointer;touch-action:manipulation;">Liquidar</button>'+
+      '</div>';
+    }).join('');
+}
+
+function abrirLiquidar(idx){
+  _liquidarIdx=idx;
+  var c=CONSIGNACIONES[idx];
+  if(!c){alert('No se encontró la consignación.');return;}
+  document.getElementById('liquidar-quien').textContent=c.quien+' · '+c.fecha;
+  var cont=document.getElementById('liquidar-items');
+  cont.innerHTML=c.items.map(function(it,i){
+    var pend=it.qty-it.vendido-it.devuelto;
+    var ext='';if(it.extras)Object.keys(it.extras).forEach(function(k){if(it.extras[k])ext+=' · '+it.extras[k];});
+    return '<div style="background:var(--color-background-secondary);border-radius:8px;padding:10px;margin-bottom:8px;">'+
+      '<div style="font-size:0.75rem;color:var(--color-text-primary);margin-bottom:6px;line-height:1.3;">'+it.eq+' | '+it.dor+' | T:'+it.tal+' | '+it.ver+' · '+it.col+ext+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;">'+
+        '<span style="font-size:0.72rem;color:var(--color-text-secondary);flex:1;">Entregado: '+it.qty+' · Pend: '+pend+'</span>'+
+        '<label style="font-size:0.72rem;color:var(--color-text-secondary);">Vendido:</label>'+
+        '<input type="number" min="0" max="'+pend+'" value="0" id="liq-vend-'+i+'" style="width:52px;padding:6px;border:1px solid var(--color-border-secondary);border-radius:6px;font-size:0.85rem;text-align:center;background:var(--color-background-primary);color:var(--color-text-primary);">'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('mod-liquidar').style.display='flex';
+}
+
+function confirmarLiquidacion(){
+  var c=CONSIGNACIONES[_liquidarIdx];
+  if(!c){alert('Error: consignación no encontrada.');return;}
+  var totalVend=0, totalDev=0;
+  var detalleVentas=[];
+  c.items.forEach(function(it,i){
+    var pend=it.qty-it.vendido-it.devuelto;
+    var vend=parseInt(document.getElementById('liq-vend-'+i).value)||0;
+    if(vend<0)vend=0;
+    if(vend>pend)vend=pend;
+    var dev=pend-vend; // lo no vendido se devuelve
+    it.vendido+=vend;
+    it.devuelto+=dev;
+    totalVend+=vend;
+    totalDev+=dev;
+    // Devolver al stock lo devuelto: buscar la tarjeta por variables
+    if(dev>0){
+      var tarjeta=INV.find(function(x){
+        return x.eq===it.eq&&x.dor===it.dor&&x.tal===it.tal&&x.ver===it.ver&&
+               x.col===it.col&&String(x.año)===String(it.año)&&
+               JSON.stringify(x.extras||{})===JSON.stringify(it.extras||{});
+      });
+      if(tarjeta){
+        tarjeta.stk+=dev;
+      }else{
+        // Si la tarjeta ya no existe, recrearla
+        INV.push({eq:it.eq,dor:it.dor,tal:it.tal,ver:it.ver,col:it.col,año:it.año,
+          extras:JSON.parse(JSON.stringify(it.extras||{})),stk:dev,id:Date.now()+Math.floor(Math.random()*1000),
+          fotos:[],fechaIngreso:new Date().toLocaleDateString('es-HN')});
+      }
+    }
+    // Registrar la venta en SAL si hubo venta
+    if(vend>0){
+      detalleVentas.push(it.eq+' T:'+it.tal+' x'+vend);
+    }
+  });
+  // Marcar como liquidada
+  c.estado='liquidada';
+  c.fechaLiq=new Date().toLocaleDateString('es-HN');
+  c.fechaLiqISO=new Date().toISOString();
+  // Registrar en bitácora
+  logBit('consignacion','Liquidacion consig: '+c.quien,'Vendido '+totalVend+' | Devuelto '+totalDev);
+  save();actualizarFechas();
+  cerrarLiquidar();
+  renderConsigLista();
+  renderInv();
+  alert('✓ Consignación liquidada.\nVendido: '+totalVend+' uds.\nDevuelto al stock: '+totalDev+' uds.');
+}
+
+function cerrarLiquidar(){
+  document.getElementById('mod-liquidar').style.display='none';
+  _liquidarIdx=-1;
+}
+
 function exportarOffline(){
   var off=INV.filter(function(c){return c.soloTienda;});
   if(!off.length){alert('No hay productos marcados como OFF LINE.');return;}
@@ -15697,7 +16030,8 @@ function exportar(){
     CAMB:CAMB,
     L:L,
     EXTRAS:EXTRAS,
-    BITACORA:BITACORA
+    BITACORA:BITACORA,
+    CONSIGNACIONES:CONSIGNACIONES
   };
   var json=JSON.stringify(datos,null,2);
   var blob=new Blob([json],{type:'application/json;charset=utf-8;'});
@@ -15775,6 +16109,7 @@ function importarRespaldo(e){
         var el=document.getElementById('resp-ultimo');if(el)el.textContent=fechaRespaldo;
         msg.className='msg ok';
         if(d.BITACORA){BITACORA=d.BITACORA;window.BITACORA=BITACORA;localStorage.setItem(BK,JSON.stringify(BITACORA));}
+        if(d.CONSIGNACIONES){CONSIGNACIONES=d.CONSIGNACIONES;window.CONSIGNACIONES=CONSIGNACIONES;localStorage.setItem('cj_cons',JSON.stringify(CONSIGNACIONES));}
         msg.textContent='✓ Respaldo restaurado: '+INV.length+' camisetas, '+SAL.length+' salidas, '+DEM.length+' pedidos sin stock.';
         setTimeout(function(){msg.className='msg';},5000);
         return;
