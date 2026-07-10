@@ -15725,9 +15725,19 @@ function abrirNuevaConsig(){
 }
 
 function fotoPrincipalUrl(c){
+  // Primero, la foto de esta talla específica
   if(c.fotos&&c.fotos.length){
     var p=c.fotos.find(function(f){return f.principal;});
     return (p||c.fotos[0]).url;
+  }
+  // Si esta talla no tiene foto, buscar en otras tallas del mismo modelo
+  var clave=claveModelo(c);
+  var conFoto=INV.find(function(x){
+    return claveModelo(x)===clave && x.fotos && x.fotos.length;
+  });
+  if(conFoto){
+    var pp=conFoto.fotos.find(function(f){return f.principal;});
+    return (pp||conFoto.fotos[0]).url;
   }
   return '';
 }
